@@ -67,6 +67,10 @@ export default function TeamManagement({ teams, onToggleEliminated, onChangeGrou
   const [showFifaRanksView, setShowFifaRanksView] = useState(false);
   const [selectedGroup, setSelectedGroup] = useState<string>("Tous");
   const [sortBy, setSortBy] = useState<"default" | "asc" | "desc">("default");
+  
+  // States for inline FIFA rank editing
+  const [editingTeamId, setEditingTeamId] = useState<string | null>(null);
+  const [editingValue, setEditingValue] = useState<string>("");
 
   const groupsList = ["Tous", "A", "B", "C", "D", "E", "F", "G", "H", "I", "J", "K", "L"];
 
@@ -140,6 +144,20 @@ export default function TeamManagement({ teams, onToggleEliminated, onChangeGrou
       }
     };
 
+    const handleSaveEditingRank = (teamId: string, value: string) => {
+      const parsed = parseInt(value, 10);
+      if (!isNaN(parsed) && parsed > 0) {
+        const updated = teams.map((t) => {
+          if (t.id === teamId) {
+            return { ...t, fifaRanking: parsed };
+          }
+          return t;
+        });
+        onUpdateAllTeams(updated);
+      }
+      setEditingTeamId(null);
+    };
+
     return (
       <div className="bg-slate-950/20 rounded-2xl p-3 sm:p-5 border border-slate-800/80">
         {/* Header toolbar */}
@@ -161,7 +179,7 @@ export default function TeamManagement({ teams, onToggleEliminated, onChangeGrou
                 Rangs FIFA
               </h2>
               <p className="text-xs text-slate-400 mt-0.5">
-                Modifiez l'ordre avec les flèches. La mise à jour s'applique instantanément partout de façon dynamique.
+                Modifiez l'ordre avec les flèches ou cliquez sur le numéro pour saisir une position.
               </p>
             </div>
           </div>
@@ -179,7 +197,7 @@ export default function TeamManagement({ teams, onToggleEliminated, onChangeGrou
         </div>
 
         <div className="p-3 bg-emerald-950/10 border border-emerald-900/20 rounded-xl mb-4 text-xs text-slate-300 leading-relaxed">
-          💡 En montant ou descendant les équipes, vous modifiez leur classement de départage pour l'onglet Classement.
+          💡 En montant ou descendant les équipes ou en écrivant un numéro de position, vous modifiez leur classement de départage pour l'onglet Classement. 
         </div>
 
         <div className="space-y-1.5 max-h-[60vh] overflow-y-auto pr-1">
@@ -212,9 +230,39 @@ export default function TeamManagement({ teams, onToggleEliminated, onChangeGrou
                   }`}
                 >
                   <div className="flex items-center gap-2.5 min-w-0">
-                    <span className={`w-7 h-7 rounded-lg border flex items-center justify-center text-xs shrink-0 ${badgeColor}`}>
-                      {team.fifaRanking}
-                    </span>
+                    {editingTeamId === team.id ? (
+                      <input
+                        type="number"
+                        min="1"
+                        max="250"
+                        className="w-10 h-7 text-center rounded bg-slate-950 border border-emerald-500 text-xs font-bold text-slate-100 focus:outline-none focus:ring-1 focus:ring-emerald-550 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
+                        value={editingValue}
+                        onChange={(e) => setEditingValue(e.target.value)}
+                        onBlur={() => handleSaveEditingRank(team.id, editingValue)}
+                        onKeyDown={(e) => {
+                          if (e.key === "Enter") {
+                            handleSaveEditingRank(team.id, editingValue);
+                          } else if (e.key === "Escape") {
+                            setEditingTeamId(null);
+                          }
+                        }}
+                        autoFocus
+                        onClick={(e) => e.stopPropagation()}
+                      />
+                    ) : (
+                      <button
+                        type="button"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          setEditingTeamId(team.id);
+                          setEditingValue(String(team.fifaRanking ?? 99));
+                        }}
+                        title="Cliquer pour entrer une position manuellement"
+                        className={`w-7 h-7 rounded-lg border flex items-center justify-center text-xs shrink-0 transition-all hover:scale-105 active:scale-95 cursor-pointer hover:border-emerald-500/70 hover:bg-emerald-500/5 ${badgeColor}`}
+                      >
+                        {team.fifaRanking}
+                      </button>
+                    )}
 
                     <Flag emoji={team.flag} name={team.name} className="w-6.5 h-6.5 rounded shrink-0 shadow-sm" />
 
