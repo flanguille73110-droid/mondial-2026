@@ -3,6 +3,57 @@ import { Team } from "../types";
 import { Search, Ban, CheckCircle, Users, SlidersHorizontal } from "lucide-react";
 import Flag from "./Flag";
 
+const TEAM_DETAILS: Record<string, { confederation: string; rank: number }> = {
+  ARG: { confederation: "CONMEBOL", rank: 1 },
+  FRA: { confederation: "UEFA", rank: 2 },
+  BEL: { confederation: "UEFA", rank: 3 },
+  ENG: { confederation: "UEFA", rank: 4 },
+  BRA: { confederation: "CONMEBOL", rank: 5 },
+  POR: { confederation: "UEFA", rank: 6 },
+  NED: { confederation: "UEFA", rank: 7 },
+  ESP: { confederation: "UEFA", rank: 8 },
+  CRO: { confederation: "UEFA", rank: 10 },
+  USA: { confederation: "CONCACAF", rank: 11 },
+  MAR: { confederation: "CAF", rank: 12 },
+  COL: { confederation: "CONMEBOL", rank: 13 },
+  URU: { confederation: "CONMEBOL", rank: 14 },
+  MEX: { confederation: "CONCACAF", rank: 15 },
+  GER: { confederation: "UEFA", rank: 16 },
+  SEN: { confederation: "CAF", rank: 17 },
+  JPN: { confederation: "AFC", rank: 18 },
+  SUI: { confederation: "UEFA", rank: 19 },
+  IRN: { confederation: "AFC", rank: 20 },
+  KOR: { confederation: "AFC", rank: 22 },
+  AUS: { confederation: "AFC", rank: 24 },
+  AUT: { confederation: "UEFA", rank: 25 },
+  TUR: { confederation: "UEFA", rank: 26 },
+  SWE: { confederation: "UEFA", rank: 28 },
+  ECU: { confederation: "CONMEBOL", rank: 31 },
+  CZE: { confederation: "UEFA", rank: 36 },
+  EGY: { confederation: "CAF", rank: 37 },
+  CIV: { confederation: "CAF", rank: 38 },
+  SCO: { confederation: "UEFA", rank: 39 },
+  CAN: { confederation: "CONCACAF", rank: 40 },
+  TUN: { confederation: "CAF", rank: 41 },
+  ALG: { confederation: "CAF", rank: 43 },
+  PAN: { confederation: "CONCACAF", rank: 44 },
+  QAT: { confederation: "AFC", rank: 46 },
+  NOR: { confederation: "UEFA", rank: 47 },
+  KSA: { confederation: "AFC", rank: 53 },
+  PAR: { confederation: "CONMEBOL", rank: 56 },
+  IRQ: { confederation: "AFC", rank: 58 },
+  RSA: { confederation: "CAF", rank: 59 },
+  COD: { confederation: "CAF", rank: 61 },
+  UZB: { confederation: "AFC", rank: 64 },
+  CPV: { confederation: "CAF", rank: 65 },
+  GHA: { confederation: "CAF", rank: 68 },
+  JOR: { confederation: "AFC", rank: 71 },
+  BIH: { confederation: "UEFA", rank: 74 },
+  HAI: { confederation: "CONCACAF", rank: 85 },
+  CUW: { confederation: "CONCACAF", rank: 86 },
+  NZL: { confederation: "OFC", rank: 107 }
+};
+
 interface TeamManagementProps {
   teams: Team[];
   onToggleEliminated: (teamId: string) => void;
@@ -145,24 +196,31 @@ export default function TeamManagement({ teams, onToggleEliminated, onChangeGrou
                 <Flag emoji={team.flag} name={team.name} className="w-8 h-8 shrink-0 rounded-md" />
                 <div className="min-w-0">
                   <div className="font-bold text-sm truncate">{team.name}</div>
-                  <div className="text-[11px] font-semibold text-slate-500 uppercase flex items-center gap-1.5 mt-0.5" onClick={(e) => e.stopPropagation()}>
-                    <span>{team.id}</span>
-                    <span className="text-slate-700">•</span>
-                    <span className="flex items-center gap-1">
-                      Gr. 
-                      <select
-                        value={team.group}
-                        onChange={(e) => {
-                          e.stopPropagation();
-                          onChangeGroup(team.id, e.target.value);
-                        }}
-                        className="bg-slate-950 border border-slate-800 rounded px-1.5 py-0.5 text-[10px] font-bold text-slate-300 focus:outline-none focus:border-emerald-500/60"
-                      >
-                        {["A", "B", "C", "D", "E", "F", "G", "H", "I", "J", "K", "L"].map((g) => (
-                          <option key={g} value={g}>{g}</option>
-                        ))}
-                      </select>
-                    </span>
+                  <div className="text-[11px] font-semibold text-slate-500 uppercase flex flex-col gap-0.5 mt-0.5" onClick={(e) => e.stopPropagation()}>
+                    <div className="flex items-center gap-1 text-slate-400">
+                      <span>{TEAM_DETAILS[team.id]?.confederation || "UEFA"}</span>
+                      <span className="text-slate-700 font-normal">•</span>
+                      <span>FIFA #{TEAM_DETAILS[team.id]?.rank || 99}</span>
+                    </div>
+                    <div className="flex items-center gap-1 text-[10px] text-slate-550 mt-0.5">
+                      <span>{team.id}</span>
+                      <span className="text-slate-800">•</span>
+                      <span className="flex items-center gap-1">
+                        Gr. 
+                        <select
+                          value={team.group}
+                          onChange={(e) => {
+                            e.stopPropagation();
+                            onChangeGroup(team.id, e.target.value);
+                          }}
+                          className="bg-slate-950 border border-slate-800 rounded px-1 py-0.5 text-[9px] font-bold text-slate-400 focus:outline-none"
+                        >
+                          {["A", "B", "C", "D", "E", "F", "G", "H", "I", "J", "K", "L"].map((g) => (
+                            <option key={g} value={g}>{g}</option>
+                          ))}
+                        </select>
+                      </span>
+                    </div>
                   </div>
                 </div>
               </div>
