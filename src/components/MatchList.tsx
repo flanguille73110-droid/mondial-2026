@@ -128,7 +128,15 @@ export default function MatchList({
               {/* Metadata top row */}
               <div className="flex justify-between items-center text-[11px] text-slate-500 border-b border-slate-800/60 pb-2.5 mb-3">
                 <span className="font-mono bg-slate-950/60 text-slate-400 font-semibold px-2 py-0.5 rounded border border-slate-800/40">
-                  Match #{match.matchNumber} {match.group ? `• Gr. ${match.group}` : ""}
+                  Match #{match.matchNumber}{" "}
+                  {match.group ? (
+                    <>
+                      • Gr.{" "}
+                      <span translate="no" className="notranslate inline-block">
+                        {match.group}
+                      </span>
+                    </>
+                  ) : ""}
                 </span>
                 <span className="flex items-center gap-1 font-semibold text-slate-400">
                   <Calendar className="w-3.5 h-3.5 text-emerald-500/70" />
@@ -156,7 +164,8 @@ export default function MatchList({
                     <select
                       value={match.teamAId || ""}
                       onChange={(e) => onUpdateTeams(match.id, e.target.value || null, match.teamBId)}
-                      className={`w-full text-center text-xs font-bold rounded-lg px-1.5 py-1.5 bg-slate-950 text-slate-300 border focus:border-emerald-500/60 focus:ring-1 focus:ring-emerald-500/30 outline-none transition-colors ${
+                      translate="no"
+                      className={`notranslate w-full text-center text-xs font-bold rounded-lg px-1.5 py-1.5 bg-slate-950 text-slate-300 border focus:border-emerald-500/60 focus:ring-1 focus:ring-emerald-500/30 outline-none transition-colors ${
                         isTeamAEliminatedConflict ? "border-rose-800 text-rose-300 bg-rose-950/20" : "border-slate-800"
                       }`}
                     >
@@ -168,9 +177,9 @@ export default function MatchList({
                         );
                         if (grpTeams.length === 0) return null;
                         return (
-                          <optgroup key={grpLetter} label={`Groupe ${grpLetter}`}>
+                          <optgroup key={grpLetter} label={`Groupe ${grpLetter}`} translate="no" className="notranslate">
                             {grpTeams.map((t) => (
-                              <option key={t.id} value={t.id}>
+                              <option key={t.id} value={t.id} translate="no" className="notranslate">
                                 {t.flag} {t.name} {t.eliminated ? " (Éliminé)" : ""}
                               </option>
                             ))}
@@ -302,7 +311,8 @@ export default function MatchList({
                     <select
                       value={match.teamBId || ""}
                       onChange={(e) => onUpdateTeams(match.id, match.teamAId, e.target.value || null)}
-                      className={`w-full text-center text-xs font-bold rounded-lg px-1.5 py-1.5 bg-slate-950 text-slate-300 border focus:border-emerald-500/60 focus:ring-1 focus:ring-emerald-500/30 outline-none transition-colors ${
+                      translate="no"
+                      className={`notranslate w-full text-center text-xs font-bold rounded-lg px-1.5 py-1.5 bg-slate-950 text-slate-300 border focus:border-emerald-500/60 focus:ring-1 focus:ring-emerald-500/30 outline-none transition-colors ${
                         isTeamBEliminatedConflict ? "border-rose-800 text-rose-300 bg-rose-950/20" : "border-slate-800"
                       }`}
                     >
@@ -314,9 +324,9 @@ export default function MatchList({
                         );
                         if (grpTeams.length === 0) return null;
                         return (
-                          <optgroup key={grpLetter} label={`Groupe ${grpLetter}`}>
+                          <optgroup key={grpLetter} label={`Groupe ${grpLetter}`} translate="no" className="notranslate">
                             {grpTeams.map((t) => (
-                              <option key={t.id} value={t.id}>
+                              <option key={t.id} value={t.id} translate="no" className="notranslate">
                                 {t.flag} {t.name} {t.eliminated ? " (Éliminé)" : ""}
                               </option>
                             ))}

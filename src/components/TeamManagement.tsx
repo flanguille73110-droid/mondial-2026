@@ -167,7 +167,16 @@ export default function TeamManagement({ teams, onToggleEliminated, onChangeGrou
                     : "bg-slate-900 text-slate-400 border-slate-800/80 hover:text-slate-200 hover:bg-slate-800"
                 }`}
               >
-                {g === "Tous" ? "Tous les Groupes" : `Groupe ${g}`}
+                {g === "Tous" ? (
+                  "Tous les Groupes"
+                ) : (
+                  <>
+                    Groupe{" "}
+                    <span translate="no" className="notranslate inline-block">
+                      {g}
+                    </span>
+                  </>
+                )}
               </button>
             ))}
           </div>
@@ -213,10 +222,13 @@ export default function TeamManagement({ teams, onToggleEliminated, onChangeGrou
                             e.stopPropagation();
                             onChangeGroup(team.id, e.target.value);
                           }}
-                          className="bg-slate-950 border border-slate-800 rounded px-1 py-0.5 text-[9px] font-bold text-slate-400 focus:outline-none"
+                          translate="no"
+                          className="notranslate bg-slate-950 border border-slate-800 rounded px-1 py-0.5 text-[9px] font-bold text-slate-400 focus:outline-none"
                         >
                           {["A", "B", "C", "D", "E", "F", "G", "H", "I", "J", "K", "L"].map((g) => (
-                            <option key={g} value={g}>{g}</option>
+                            <option key={g} value={g} translate="no" className="notranslate">
+                              {g}
+                            </option>
                           ))}
                         </select>
                       </span>

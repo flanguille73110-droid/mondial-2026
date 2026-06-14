@@ -265,7 +265,10 @@ export default function Standings({ teams, matches }: StandingsProps) {
                       : "bg-slate-950/50 text-slate-400 border-transparent hover:text-slate-200 hover:bg-slate-950"
                   }`}
                 >
-                  Gr. {grp}
+                  Gr.{" "}
+                  <span translate="no" className="notranslate inline-block">
+                    {grp}
+                  </span>
                 </button>
               ))}
             </div>
@@ -312,7 +315,10 @@ export default function Standings({ teams, matches }: StandingsProps) {
                     <div className="flex justify-between items-center border-b border-slate-800/80 pb-2 mb-3">
                       <h3 className="text-sm font-extrabold text-slate-100 flex items-center gap-2">
                         <span className="w-2.5 h-4 bg-emerald-500 rounded-sm"></span>
-                        GROUPE {groupLetter}
+                        GROUPE{" "}
+                        <span translate="no" className="notranslate inline-block">
+                          {groupLetter}
+                        </span>
                       </h3>
                       <span className="text-[10px] text-slate-500 font-mono font-semibold">
                         Coupe du Monde 2026
@@ -558,7 +564,10 @@ export default function Standings({ teams, matches }: StandingsProps) {
                           {/* Group identifier */}
                           <td className="py-2.5 px-2 text-center">
                             <span className="inline-block text-[10px] bg-slate-950 text-slate-400 font-extrabold px-2 py-0.5 rounded border border-slate-850">
-                              Groupe {team.group}
+                              Groupe{" "}
+                              <span translate="no" className="notranslate inline-block">
+                                {team.group}
+                              </span>
                             </span>
                           </td>
 
