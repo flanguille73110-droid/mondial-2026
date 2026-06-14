@@ -2,76 +2,76 @@ import { Team, Match, Stage } from "./types";
 
 export const INITIAL_TEAMS: Team[] = [
   // Group A
-  { id: "RSA", name: "Afrique du Sud", flag: "🇿🇦", group: "A", eliminated: false },
-  { id: "KOR", name: "Corée du Sud", flag: "🇰🇷", group: "A", eliminated: false },
-  { id: "MEX", name: "Mexique", flag: "🇲🇽", group: "A", eliminated: false },
-  { id: "CZE", name: "Tchéquie", flag: "🇨🇿", group: "A", eliminated: false },
+  { id: "RSA", name: "Afrique du Sud", flag: "🇿🇦", group: "A", eliminated: false, fifaRanking: 59 },
+  { id: "KOR", name: "Corée du Sud", flag: "🇰🇷", group: "A", eliminated: false, fifaRanking: 22 },
+  { id: "MEX", name: "Mexique", flag: "🇲🇽", group: "A", eliminated: false, fifaRanking: 15 },
+  { id: "CZE", name: "Tchéquie", flag: "🇨🇿", group: "A", eliminated: false, fifaRanking: 36 },
 
   // Group B
-  { id: "BIH", name: "Bosnie-Herzégovine", flag: "🇧🇦", group: "B", eliminated: false },
-  { id: "CAN", name: "Canada", flag: "🇨🇦", group: "B", eliminated: false },
-  { id: "QAT", name: "Qatar", flag: "🇶🇦", group: "B", eliminated: false },
-  { id: "SUI", name: "Suisse", flag: "🇨🇭", group: "B", eliminated: false },
+  { id: "BIH", name: "Bosnie-Herzégovine", flag: "🇧🇦", group: "B", eliminated: false, fifaRanking: 74 },
+  { id: "CAN", name: "Canada", flag: "🇨🇦", group: "B", eliminated: false, fifaRanking: 40 },
+  { id: "QAT", name: "Qatar", flag: "🇶🇦", group: "B", eliminated: false, fifaRanking: 46 },
+  { id: "SUI", name: "Suisse", flag: "🇨🇭", group: "B", eliminated: false, fifaRanking: 19 },
 
   // Group C
-  { id: "BRA", name: "Brésil", flag: "🇧🇷", group: "C", eliminated: false },
-  { id: "MAR", name: "Maroc", flag: "🇲🇦", group: "C", eliminated: false },
-  { id: "HAI", name: "Haïti", flag: "🇭🇹", group: "C", eliminated: false },
-  { id: "SCO", name: "Écosse", flag: "🏴󠁧󠁢󠁳󠁣󠁴󠁿", group: "C", eliminated: false },
+  { id: "BRA", name: "Brésil", flag: "🇧🇷", group: "C", eliminated: false, fifaRanking: 5 },
+  { id: "MAR", name: "Maroc", flag: "🇲🇦", group: "C", eliminated: false, fifaRanking: 12 },
+  { id: "HAI", name: "Haïti", flag: "🇭🇹", group: "C", eliminated: false, fifaRanking: 85 },
+  { id: "SCO", name: "Écosse", flag: "🏴󠁧󠁢󠁳󠁣󠁴󠁿", group: "C", eliminated: false, fifaRanking: 39 },
 
   // Group D
-  { id: "AUS", name: "Australie", flag: "🇦🇺", group: "D", eliminated: false },
-  { id: "USA", name: "États-Unis", flag: "🇺🇸", group: "D", eliminated: false },
-  { id: "PAR", name: "Paraguay", flag: "🇵🇾", group: "D", eliminated: false },
-  { id: "TUR", name: "Turquie", flag: "🇹🇷", group: "D", eliminated: false },
+  { id: "AUS", name: "Australie", flag: "🇦🇺", group: "D", eliminated: false, fifaRanking: 24 },
+  { id: "USA", name: "États-Unis", flag: "🇺🇸", group: "D", eliminated: false, fifaRanking: 11 },
+  { id: "PAR", name: "Paraguay", flag: "🇵🇾", group: "D", eliminated: false, fifaRanking: 56 },
+  { id: "TUR", name: "Turquie", flag: "🇹🇷", group: "D", eliminated: false, fifaRanking: 26 },
 
   // Group E
-  { id: "GER", name: "Allemagne", flag: "🇩🇪", group: "E", eliminated: false },
-  { id: "CUW", name: "Curaçao", flag: "🇨🇼", group: "E", eliminated: false },
-  { id: "CIV", name: "Côte d'Ivoire", flag: "🇨🇮", group: "E", eliminated: false },
-  { id: "ECU", name: "Équateur", flag: "🇪🇨", group: "E", eliminated: false },
+  { id: "GER", name: "Allemagne", flag: "🇩🇪", group: "E", eliminated: false, fifaRanking: 16 },
+  { id: "CUW", name: "Curaçao", flag: "🇨🇼", group: "E", eliminated: false, fifaRanking: 86 },
+  { id: "CIV", name: "Côte d'Ivoire", flag: "🇨🇮", group: "E", eliminated: false, fifaRanking: 38 },
+  { id: "ECU", name: "Équateur", flag: "🇪🇨", group: "E", eliminated: false, fifaRanking: 31 },
 
   // Group F
-  { id: "NED", name: "Pays-Bas", flag: "🇳🇱", group: "F", eliminated: false },
-  { id: "JPN", name: "Japon", flag: "🇯🇵", group: "F", eliminated: false },
-  { id: "SWE", name: "Suède", flag: "🇸🇪", group: "F", eliminated: false },
-  { id: "TUN", name: "Tunisie", flag: "🇹🇳", group: "F", eliminated: false },
+  { id: "NED", name: "Pays-Bas", flag: "🇳🇱", group: "F", eliminated: false, fifaRanking: 7 },
+  { id: "JPN", name: "Japon", flag: "🇯🇵", group: "F", eliminated: false, fifaRanking: 18 },
+  { id: "SWE", name: "Suède", flag: "🇸🇪", group: "F", eliminated: false, fifaRanking: 28 },
+  { id: "TUN", name: "Tunisie", flag: "🇹🇳", group: "F", eliminated: false, fifaRanking: 41 },
 
   // Group G
-  { id: "BEL", name: "Belgique", flag: "🇧🇪", group: "G", eliminated: false },
-  { id: "EGY", name: "Égypte", flag: "🇪🇬", group: "G", eliminated: false },
-  { id: "IRN", name: "Iran", flag: "🇮🇷", group: "G", eliminated: false },
-  { id: "NZL", name: "Nouvelle-Zélande", flag: "🇳🇿", group: "G", eliminated: false },
+  { id: "BEL", name: "Belgique", flag: "🇧🇪", group: "G", eliminated: false, fifaRanking: 3 },
+  { id: "EGY", name: "Égypte", flag: "🇪🇬", group: "G", eliminated: false, fifaRanking: 37 },
+  { id: "IRN", name: "Iran", flag: "🇮🇷", group: "G", eliminated: false, fifaRanking: 20 },
+  { id: "NZL", name: "Nouvelle-Zélande", flag: "🇳🇿", group: "G", eliminated: false, fifaRanking: 107 },
 
   // Group H
-  { id: "ESP", name: "Espagne", flag: "🇪🇸", group: "H", eliminated: false },
-  { id: "CPV", name: "Cap-Vert", flag: "🇨🇻", group: "H", eliminated: false },
-  { id: "KSA", name: "Arabie Saoudite", flag: "🇸🇦", group: "H", eliminated: false },
-  { id: "URU", name: "Uruguay", flag: "🇺🇾", group: "H", eliminated: false },
+  { id: "ESP", name: "Espagne", flag: "🇪🇸", group: "H", eliminated: false, fifaRanking: 8 },
+  { id: "CPV", name: "Cap-Vert", flag: "🇨🇻", group: "H", eliminated: false, fifaRanking: 65 },
+  { id: "KSA", name: "Arabie Saoudite", flag: "🇸🇦", group: "H", eliminated: false, fifaRanking: 53 },
+  { id: "URU", name: "Uruguay", flag: "🇺🇾", group: "H", eliminated: false, fifaRanking: 14 },
 
   // Group I
-  { id: "FRA", name: "France", flag: "🇫🇷", group: "I", eliminated: false },
-  { id: "SEN", name: "Sénégal", flag: "🇸🇳", group: "I", eliminated: false },
-  { id: "IRQ", name: "Irak", flag: "🇮🇶", group: "I", eliminated: false },
-  { id: "NOR", name: "Norvège", flag: "🇳🇴", group: "I", eliminated: false },
+  { id: "FRA", name: "France", flag: "🇫🇷", group: "I", eliminated: false, fifaRanking: 2 },
+  { id: "SEN", name: "Sénégal", flag: "🇸🇳", group: "I", eliminated: false, fifaRanking: 17 },
+  { id: "IRQ", name: "Irak", flag: "🇮🇶", group: "I", eliminated: false, fifaRanking: 58 },
+  { id: "NOR", name: "Norvège", flag: "🇳🇴", group: "I", eliminated: false, fifaRanking: 47 },
 
   // Group J
-  { id: "ARG", name: "Argentine", flag: "🇦🇷", group: "J", eliminated: false },
-  { id: "ALG", name: "Algérie", flag: "🇩🇿", group: "J", eliminated: false },
-  { id: "AUT", name: "Autriche", flag: "🇦🇹", group: "J", eliminated: false },
-  { id: "JOR", name: "Jordanie", flag: "🇯🇴", group: "J", eliminated: false },
+  { id: "ARG", name: "Argentine", flag: "🇦🇷", group: "J", eliminated: false, fifaRanking: 1 },
+  { id: "ALG", name: "Algérie", flag: "🇩🇿", group: "J", eliminated: false, fifaRanking: 43 },
+  { id: "AUT", name: "Autriche", flag: "🇦🇹", group: "J", eliminated: false, fifaRanking: 25 },
+  { id: "JOR", name: "Jordanie", flag: "🇯🇴", group: "J", eliminated: false, fifaRanking: 71 },
 
   // Group K
-  { id: "POR", name: "Portugal", flag: "🇵🇹", group: "K", eliminated: false },
-  { id: "COD", name: "RD Congo", flag: "🇨🇩", group: "K", eliminated: false },
-  { id: "UZB", name: "Ouzbékistan", flag: "🇺🇿", group: "K", eliminated: false },
-  { id: "COL", name: "Colombie", flag: "🇨🇴", group: "K", eliminated: false },
+  { id: "POR", name: "Portugal", flag: "🇵🇹", group: "K", eliminated: false, fifaRanking: 6 },
+  { id: "COD", name: "RD Congo", flag: "🇨🇩", group: "K", eliminated: false, fifaRanking: 61 },
+  { id: "UZB", name: "Ouzbékistan", flag: "🇺🇿", group: "K", eliminated: false, fifaRanking: 64 },
+  { id: "COL", name: "Colombie", flag: "🇨🇴", group: "K", eliminated: false, fifaRanking: 13 },
 
   // Group L
-  { id: "ENG", name: "Angleterre", flag: "🏴󠁧󠁢󠁥󠁮󠁧󠁿", group: "L", eliminated: false },
-  { id: "CRO", name: "Croatie", flag: "🇭🇷", group: "L", eliminated: false },
-  { id: "GHA", name: "Ghana", flag: "🇬🇭", group: "L", eliminated: false },
-  { id: "PAN", name: "Panama", flag: "🇵🇦", group: "L", eliminated: false },
+  { id: "ENG", name: "Angleterre", flag: "🏴󠁧󠁢󠁥󠁮󠁧󠁿", group: "L", eliminated: false, fifaRanking: 4 },
+  { id: "CRO", name: "Croatie", flag: "🇭🇷", group: "L", eliminated: false, fifaRanking: 10 },
+  { id: "GHA", name: "Ghana", flag: "🇬🇭", group: "L", eliminated: false, fifaRanking: 68 },
+  { id: "PAN", name: "Panama", flag: "🇵🇦", group: "L", eliminated: false, fifaRanking: 44 },
 ];
 
 // Generate French dates dynamically from 11 Juin 2026 to 27 Juin 2026 for group stage

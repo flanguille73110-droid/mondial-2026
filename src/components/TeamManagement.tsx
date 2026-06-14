@@ -1,6 +1,6 @@
 import React, { useState, useMemo } from "react";
 import { Team } from "../types";
-import { Search, Ban, CheckCircle, Users, SlidersHorizontal } from "lucide-react";
+import { Search, Ban, CheckCircle, Users, SlidersHorizontal, ArrowUp, ArrowDown, ChevronLeft, ListOrdered } from "lucide-react";
 import Flag from "./Flag";
 
 const TEAM_DETAILS: Record<string, { confederation: string; rank: number }> = {
@@ -58,10 +58,13 @@ interface TeamManagementProps {
   teams: Team[];
   onToggleEliminated: (teamId: string) => void;
   onChangeGroup: (teamId: string, newGroup: string) => void;
+  onUpdateAllTeams: (updatedTeams: Team[]) => void;
 }
 
-export default function TeamManagement({ teams, onToggleEliminated, onChangeGroup }: TeamManagementProps) {
+export default function TeamManagement({ teams, onToggleEliminated, onChangeGroup, onUpdateAllTeams }: TeamManagementProps) {
   const [search, setSearch] = useState("");
+  const [searchFifa, setSearchFifa] = useState("");
+  const [showFifaRanksView, setShowFifaRanksView] = useState(false);
   const [selectedGroup, setSelectedGroup] = useState<string>("Tous");
   const [sortBy, setSortBy] = useState<"default" | "asc" | "desc">("default");
 
@@ -93,6 +96,186 @@ export default function TeamManagement({ teams, onToggleEliminated, onChangeGrou
     return { total, active, eliminated };
   }, [teams]);
 
+  if (showFifaRanksView) {
+    const sortedFifaTeams = [...teams].sort(
+      (a, b) => (a.fifaRanking ?? 99) - (b.fifaRanking ?? 99)
+    );
+
+    const filteredFifaTeams = sortedFifaTeams.filter(
+      (t) =>
+        t.name.toLowerCase().includes(searchFifa.toLowerCase()) ||
+        t.id.toLowerCase().includes(searchFifa.toLowerCase())
+    );
+
+    const handleMoveRank = (teamId: string, direction: "up" | "down") => {
+      const index = sortedFifaTeams.findIndex((t) => t.id === teamId);
+      if (index === -1) return;
+
+      if (direction === "up" && index > 0) {
+        const currentTeam = sortedFifaTeams[index];
+        const prevTeam = sortedFifaTeams[index - 1];
+
+        const currentRank = currentTeam.fifaRanking ?? 99;
+        const prevRank = prevTeam.fifaRanking ?? 99;
+
+        const updated = teams.map((t) => {
+          if (t.id === currentTeam.id) return { ...t, fifaRanking: prevRank };
+          if (t.id === prevTeam.id) return { ...t, fifaRanking: currentRank };
+          return t;
+        });
+        onUpdateAllTeams(updated);
+      } else if (direction === "down" && index < sortedFifaTeams.length - 1) {
+        const currentTeam = sortedFifaTeams[index];
+        const nextTeam = sortedFifaTeams[index + 1];
+
+        const currentRank = currentTeam.fifaRanking ?? 99;
+        const nextRank = nextTeam.fifaRanking ?? 99;
+
+        const updated = teams.map((t) => {
+          if (t.id === currentTeam.id) return { ...t, fifaRanking: nextRank };
+          if (t.id === nextTeam.id) return { ...t, fifaRanking: currentRank };
+          return t;
+        });
+        onUpdateAllTeams(updated);
+      }
+    };
+
+    return (
+      <div className="bg-slate-950/20 rounded-2xl p-3 sm:p-5 border border-slate-800/80">
+        {/* Header toolbar */}
+        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6 pb-4 border-b border-slate-800/50">
+          <div className="flex items-center gap-3">
+            <button
+              onClick={() => {
+                setShowFifaRanksView(false);
+                setSearchFifa("");
+              }}
+              className="p-2 bg-slate-905 bg-slate-900 border border-slate-800 text-slate-400 hover:text-slate-200 rounded-xl transition-all cursor-pointer"
+              title="Retour aux Équipes"
+            >
+              <ChevronLeft className="w-5 h-5" />
+            </button>
+            <div>
+              <h2 className="text-xl font-bold flex items-center gap-2 text-slate-100">
+                <ListOrdered className="w-5 h-5 text-emerald-500" />
+                Rangs FIFA
+              </h2>
+              <p className="text-xs text-slate-400 mt-0.5">
+                Modifiez l'ordre avec les flèches. La mise à jour s'applique instantanément partout de façon dynamique.
+              </p>
+            </div>
+          </div>
+
+          <div className="relative w-full sm:w-64">
+            <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-500 w-4 h-4" />
+            <input
+              type="text"
+              placeholder="Rechercher un pays..."
+              value={searchFifa}
+              onChange={(e) => setSearchFifa(e.target.value)}
+              className="w-full bg-slate-900 border border-slate-800 hover:border-slate-700 focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500/30 rounded-xl py-2.5 pl-10 pr-4 text-xs text-slate-200 placeholder-slate-500 transition-all outline-none"
+            />
+          </div>
+        </div>
+
+        <div className="p-3 bg-emerald-950/10 border border-emerald-900/20 rounded-xl mb-4 text-xs text-slate-300 leading-relaxed">
+          💡 En montant ou descendant les équipes, vous modifiez leur classement de départage pour l'onglet Classement.
+        </div>
+
+        <div className="space-y-1.5 max-h-[60vh] overflow-y-auto pr-1">
+          {filteredFifaTeams.length === 0 ? (
+            <div className="text-center py-10 border border-dashed border-slate-800 rounded-xl">
+              <p className="text-slate-500 text-xs">Aucune équipe ne correspond.</p>
+            </div>
+          ) : (
+            filteredFifaTeams.map((team) => {
+              const globalIdx = sortedFifaTeams.findIndex((t) => t.id === team.id);
+              const isFirst = globalIdx === 0;
+              const isLast = globalIdx === sortedFifaTeams.length - 1;
+
+              let badgeColor = "bg-slate-950 text-slate-400 border-slate-800/80";
+              if (team.fifaRanking === 1) {
+                badgeColor = "bg-amber-500/10 text-amber-400 border-amber-500/20 font-bold";
+              } else if (team.fifaRanking === 2) {
+                badgeColor = "bg-slate-200/10 text-slate-200 border-slate-300/20 font-bold";
+              } else if (team.fifaRanking === 3) {
+                badgeColor = "bg-amber-750/10 text-amber-500 border-amber-700/20 font-bold";
+              }
+
+              return (
+                <div
+                  key={team.id}
+                  className={`flex items-center justify-between p-2.5 rounded-xl border transition-colors ${
+                    team.eliminated
+                      ? "bg-slate-950/10 border-rose-950/15 opacity-40 text-slate-500"
+                      : "bg-slate-900/40 hover:bg-slate-900/80 border-slate-800/40 text-slate-200"
+                  }`}
+                >
+                  <div className="flex items-center gap-2.5 min-w-0">
+                    <span className={`w-7 h-7 rounded-lg border flex items-center justify-center text-xs shrink-0 ${badgeColor}`}>
+                      {team.fifaRanking}
+                    </span>
+
+                    <Flag emoji={team.flag} name={team.name} className="w-6.5 h-6.5 rounded shrink-0 shadow-sm" />
+
+                    <div className="min-w-0">
+                      <div className="font-bold text-xs flex items-center gap-1.5 truncate">
+                        <span>{team.name}</span>
+                        <span className="text-[10px] text-slate-500 font-mono">({team.id})</span>
+                      </div>
+                      <div className="text-[9px] text-slate-500 font-medium mt-0.5">
+                        Groupe {team.group} • {TEAM_DETAILS[team.id]?.confederation || "UEFA"} {team.eliminated && "• Éliminée"}
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="flex items-center gap-1 shrink-0">
+                    <button
+                      onClick={() => handleMoveRank(team.id, "up")}
+                      disabled={isFirst}
+                      className={`p-2 rounded-lg border transition-all ${
+                        isFirst
+                          ? "opacity-20 cursor-not-allowed bg-slate-900/10 border-transparent text-slate-650"
+                          : "bg-slate-900 border-slate-800 hover:border-slate-700 text-slate-400 hover:text-emerald-400 hover:border-emerald-500/30 cursor-pointer active:scale-95"
+                      }`}
+                      title="Monter d'un rang"
+                    >
+                      <ArrowUp className="w-3.5 h-3.5" />
+                    </button>
+                    <button
+                      onClick={() => handleMoveRank(team.id, "down")}
+                      disabled={isLast}
+                      className={`p-2 rounded-lg border transition-all ${
+                        isLast
+                          ? "opacity-20 cursor-not-allowed bg-slate-900/10 border-transparent text-slate-650"
+                          : "bg-slate-900 border-slate-800 hover:border-slate-700 text-slate-400 hover:text-rose-450 hover:border-rose-500/30 cursor-pointer active:scale-95"
+                      }`}
+                      title="Descendre d'un rang"
+                    >
+                      <ArrowDown className="w-3.5 h-3.5" />
+                    </button>
+                  </div>
+                </div>
+              );
+            })
+          )}
+        </div>
+
+        <div className="mt-5 pt-4 border-t border-slate-800/40 flex justify-end">
+          <button
+            onClick={() => {
+              setShowFifaRanksView(false);
+              setSearchFifa("");
+            }}
+            className="px-4 py-2 text-xs font-bold bg-slate-900 hover:bg-slate-800 border border-slate-800 text-slate-300 hover:text-slate-100 rounded-xl transition-colors cursor-pointer"
+          >
+            Retour aux Équipes
+          </button>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="bg-slate-950/20 rounded-2xl p-3 sm:p-5 border border-slate-800/80">
       {/* Title & Stats Ribbon */}
@@ -107,17 +290,29 @@ export default function TeamManagement({ teams, onToggleEliminated, onChangeGrou
           </p>
         </div>
 
-        {/* Stats segment */}
-        <div className="flex items-center gap-2 text-xs bg-slate-900/80 border border-slate-800 p-1.5 rounded-lg w-full md:w-auto overflow-x-auto justify-between">
-          <span className="px-2.5 py-1 rounded bg-slate-800/80 text-slate-300 font-medium shrink-0">
-            Total : <strong className="text-emerald-400">{stats.total}</strong>
-          </span>
-          <span className="px-2.5 py-1 rounded bg-emerald-900/20 text-emerald-300 font-medium shrink-0">
-            Actives : <strong>{stats.active}</strong>
-          </span>
-          <span className="px-2.5 py-1 rounded bg-rose-950/30 text-rose-300 font-medium shrink-0">
-            Éliminées : <strong>{stats.eliminated}</strong>
-          </span>
+        {/* Stats segment and Rangs FIFA CTA */}
+        <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2.5 w-full md:w-auto">
+          <div className="flex items-center gap-2 text-xs bg-slate-900/80 border border-slate-800 p-1.5 rounded-lg overflow-x-auto justify-between flex-1 sm:flex-initial">
+            <span className="px-2 font-semibold text-slate-450 whitespace-nowrap">Statut :</span>
+            <span className="px-2 py-0.5 rounded bg-slate-800/80 text-slate-300 font-medium shrink-0">
+              Total : <strong className="text-emerald-400">{stats.total}</strong>
+            </span>
+            <span className="px-2 py-0.5 rounded bg-emerald-900/20 text-emerald-300 font-medium shrink-0">
+              Actives : <strong>{stats.active}</strong>
+            </span>
+            <span className="px-2 py-0.5 rounded bg-rose-950/30 text-rose-300 font-medium shrink-0">
+              Éliminées : <strong>{stats.eliminated}</strong>
+            </span>
+          </div>
+
+          <button
+            type="button"
+            onClick={() => setShowFifaRanksView(true)}
+            className="flex items-center justify-center gap-1.5 bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs px-3.5 py-2 rounded-xl border border-emerald-500/40 shadow-md shadow-emerald-950/30 transition-all active:scale-95 cursor-pointer whitespace-nowrap shrink-0"
+          >
+            <ListOrdered className="w-4 h-4" />
+            <span>Rangs FIFA</span>
+          </button>
         </div>
       </div>
 
@@ -209,7 +404,7 @@ export default function TeamManagement({ teams, onToggleEliminated, onChangeGrou
                     <div className="flex items-center gap-1 text-slate-400">
                       <span>{TEAM_DETAILS[team.id]?.confederation || "UEFA"}</span>
                       <span className="text-slate-700 font-normal">•</span>
-                      <span>FIFA #{TEAM_DETAILS[team.id]?.rank || 99}</span>
+                      <span>FIFA #{team.fifaRanking !== undefined ? team.fifaRanking : (TEAM_DETAILS[team.id]?.rank || 99)}</span>
                     </div>
                     <div className="flex items-center gap-1 text-[10px] text-slate-550 mt-0.5">
                       <span>{team.id}</span>

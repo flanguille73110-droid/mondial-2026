@@ -62,7 +62,7 @@ export default function Standings({ teams, matches }: StandingsProps) {
         yellowCards: 0,
         redCards: 0,
         fairPlayPenalty: 0,
-        fifaRanking: FIFA_RANKINGS[t.id] || 99,
+        fifaRanking: t.fifaRanking !== undefined ? t.fifaRanking : (FIFA_RANKINGS[t.id] || 99),
         points: 0,
         eliminated: t.eliminated,
       });
@@ -437,7 +437,7 @@ export default function Standings({ teams, matches }: StandingsProps) {
                       Top 2 qualifiés
                     </span>
                     <span className="font-mono text-slate-600">
-                      Rangs FIFA : {groupTeams.map(t => `${t.id}:${FIFA_RANKINGS[t.id] || 99}`).join(" • ")}
+                      Rangs FIFA : {groupTeams.map(t => `${t.id}:${t.fifaRanking}`).join(" • ")}
                     </span>
                   </div>
                 </div>

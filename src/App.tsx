@@ -32,7 +32,20 @@ export default function App() {
 
     if (savedTeamsStr) {
       try {
-        setTeams(JSON.parse(savedTeamsStr));
+        let loadedTeams: Team[] = JSON.parse(savedTeamsStr);
+        // Ensure fifaRanking is set on all loaded teams (migration for older storage)
+        const hasMissingRanking = loadedTeams.some((t) => t.fifaRanking === undefined);
+        if (hasMissingRanking) {
+          loadedTeams = loadedTeams.map((t) => {
+            const initial = INITIAL_TEAMS.find((it) => it.id === t.id);
+            return {
+              ...t,
+              fifaRanking: t.fifaRanking !== undefined ? t.fifaRanking : (initial?.fifaRanking || 99),
+            };
+          });
+          localStorage.setItem("wc2026_teams", JSON.stringify(loadedTeams));
+        }
+        setTeams(loadedTeams);
       } catch (e) {
         setTeams(INITIAL_TEAMS);
       }
@@ -106,6 +119,12 @@ export default function App() {
     const updatedTeams = teams.map((team) =>
       team.id === teamId ? { ...team, group: newGroup } : team
     );
+    setTeams(updatedTeams);
+    localStorage.setItem("wc2026_teams", JSON.stringify(updatedTeams));
+  };
+
+  // Update all teams array & save
+  const handleUpdateAllTeams = (updatedTeams: Team[]) => {
     setTeams(updatedTeams);
     localStorage.setItem("wc2026_teams", JSON.stringify(updatedTeams));
   };
@@ -258,6 +277,7 @@ export default function App() {
                 teams={teams} 
                 onToggleEliminated={handleToggleEliminated} 
                 onChangeGroup={handleUpdateTeamGroup}
+                onUpdateAllTeams={handleUpdateAllTeams}
               />
             )}
           </div>
