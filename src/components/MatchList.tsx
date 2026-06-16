@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from "react";
+import React, { useState, useMemo, useEffect } from "react";
 import { Match, Team, Stage } from "../types";
 import { Plus, Minus, Tv, Calendar, Trash2, HelpCircle } from "lucide-react";
 import Flag from "./Flag";
@@ -42,6 +42,26 @@ export default function MatchList({
     }
     return filtered;
   }, [matches, selectedStage, selectedGroupFilter]);
+
+  // Trouver l'ID du premier match non rempli (scoreA ou scoreB est null)
+  const firstUnfilledMatchId = useMemo(() => {
+    return stageMatches.find((m) => m.scoreA === null || m.scoreB === null)?.id || null;
+  }, [stageMatches]);
+
+  // Défilement automatique fluide vers le premier match non saisi dès l'ouverture / changement de filtre
+  useEffect(() => {
+    if (firstUnfilledMatchId) {
+      const timer = setTimeout(() => {
+        const element = document.getElementById(`match-card-${firstUnfilledMatchId}`);
+        if (element) {
+          element.scrollIntoView({ behavior: "smooth", block: "center" });
+        }
+      }, 150);
+      return () => clearTimeout(timer);
+    }
+    // On ne se fie qu'au montage inicial et au changement de phase/filtre pour éviter tout défilement intempestif pendant la saisie des scores.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [selectedStage, selectedGroupFilter]);
 
   // Handle score increment / decrement
   const adjustScore = (match: Match, team: "A" | "B", action: "inc" | "dec") => {
@@ -123,6 +143,7 @@ export default function MatchList({
           return (
             <div
               key={match.id}
+              id={`match-card-${match.id}`}
               className="bg-slate-900/60 hover:bg-slate-900/80 border border-slate-800/80 rounded-xl p-4 transition-all flex flex-col justify-between shadow-md"
             >
               {/* Metadata top row */}

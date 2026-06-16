@@ -1,5 +1,5 @@
 import React from "react";
-import { Trophy, RefreshCw, Calendar, Users } from "lucide-react";
+import { Trophy, RefreshCw, Calendar, Users, Settings } from "lucide-react";
 
 interface HeaderProps {
   totalMatches: number;
@@ -8,6 +8,7 @@ interface HeaderProps {
   activeTeams: number;
   onReset: () => void;
   onShowNotice: () => void;
+  onShowSettings: () => void;
 }
 
 export default function Header({
@@ -17,17 +18,8 @@ export default function Header({
   activeTeams,
   onReset,
   onShowNotice,
+  onShowSettings,
 }: HeaderProps) {
-  const handleResetConfirm = () => {
-    if (
-      window.confirm(
-        "Êtes-vous sûr de vouloir réinitialiser tout le calendrier, les scores et le statut des équipes ? Cette action est irréversible."
-      )
-    ) {
-      onReset();
-    }
-  };
-
   const progressPercent = Math.round((completedMatches / totalMatches) * 100) || 0;
 
   return (
@@ -51,6 +43,14 @@ export default function Header({
 
           <div className="flex items-center gap-2 sm:gap-3 w-full sm:w-auto justify-end">
             <button
+              onClick={onShowSettings}
+              className="flex items-center justify-center gap-1.5 px-3 py-2 text-xs font-semibold bg-slate-800 hover:bg-slate-700 active:bg-slate-900 border border-slate-700 hover:border-slate-600 text-amber-400 rounded-lg transition-colors w-full sm:w-auto cursor-pointer"
+              title="Ouvrir les paramètres de l'application"
+            >
+              <Settings className="w-3.5 h-3.5 text-amber-400" />
+              Paramètres
+            </button>
+            <button
               onClick={onShowNotice}
               className="flex items-center justify-center gap-1.5 px-3 py-2 text-xs font-semibold bg-slate-800 hover:bg-slate-700 active:bg-slate-900 border border-slate-700 hover:border-slate-600 text-emerald-400 rounded-lg transition-colors w-full sm:w-auto"
               title="Afficher la notice d'utilisation"
@@ -59,8 +59,8 @@ export default function Header({
               Notice
             </button>
             <button
-              onClick={handleResetConfirm}
-              className="flex items-center justify-center gap-1.5 px-3 py-2 text-xs font-semibold bg-slate-800 hover:bg-slate-700 active:bg-slate-900 border border-slate-700 hover:border-slate-600 rounded-lg text-rose-400 transition-colors w-full sm:w-auto"
+              onClick={onReset}
+              className="flex items-center justify-center gap-1.5 px-3 py-2 text-xs font-semibold bg-slate-800 hover:bg-slate-700 active:bg-slate-900 border border-slate-700 hover:border-slate-600 rounded-lg text-rose-400 transition-colors w-full sm:w-auto cursor-pointer"
               title="Réinitialiser toutes les données"
             >
               <RefreshCw className="w-3.5 h-3.5" />

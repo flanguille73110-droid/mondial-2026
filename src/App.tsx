@@ -1,18 +1,30 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { INITIAL_TEAMS, generateInitialMatches } from "./initialData";
 import { Team, Match, Stage } from "./types";
 import Header from "./components/Header";
 import MatchList from "./components/MatchList";
 import TeamManagement from "./components/TeamManagement";
 import Standings from "./components/Standings";
-import { Calendar, Users, Info, HelpCircle, Trophy } from "lucide-react";
+import SettingsModal from "./components/SettingsModal";
+import HomeTab from "./components/HomeTab";
+import { Calendar, Users, Info, HelpCircle, Trophy, ChevronUp, ChevronDown, AlertTriangle, RotateCcw, Home } from "lucide-react";
 
 export default function App() {
   const [teams, setTeams] = useState<Team[]>([]);
   const [matches, setMatches] = useState<Match[]>([]);
-  const [activeTab, setActiveTab] = useState<"CALENDAR" | "TEAMS" | "STANDINGS">("CALENDAR");
+  const [activeTab, setActiveTab] = useState<"HOME" | "CALENDAR" | "TEAMS" | "STANDINGS">("HOME");
   const [selectedStage, setSelectedStage] = useState<Stage>(Stage.GROUPS);
   const [showHowTo, setShowHowTo] = useState(false);
+  const [showSettings, setShowSettings] = useState(false);
+  const [showResetConfirm, setShowResetConfirm] = useState(false);
+  const [isPhasesExpanded, setIsPhasesExpanded] = useState(true);
+  
+  // Ref to the main scrollable container to force scroll-to-top on tab changes
+  const mainScrollRef = useRef<HTMLDivElement>(null);
+  
+  // Refs for tracking automatic scroll/selection to avoid loop updates during scoring
+  const lastTabRef = useRef<string>("");
+  const hasAutoSelectedRef = useRef<boolean>(false);
 
   // Load from LocalStorage or initialize with defaults
   useEffect(() => {
@@ -63,6 +75,49 @@ export default function App() {
       setMatches(generateInitialMatches());
     }
   }, []);
+
+  // Remonter en haut de page à chaque changement d'onglet (notamment pour Classement et Équipes)
+  useEffect(() => {
+    window.scrollTo({ top: 0 });
+    if (mainScrollRef.current) {
+      mainScrollRef.current.scrollTo({ top: 0 });
+    }
+  }, [activeTab]);
+
+  // Synchronise automatiquement l'onglet des phases du calendrier lors de l'ouverture
+  useEffect(() => {
+    if (activeTab === "CALENDAR" && matches.length > 0) {
+      const isSwitchingTab = lastTabRef.current !== "CALENDAR";
+      const isInitialAutoSelect = !hasAutoSelectedRef.current;
+
+      if (isSwitchingTab || isInitialAutoSelect) {
+        const STAGE_ORDER = [
+          Stage.GROUPS,
+          Stage.ROUND_32,
+          Stage.ROUND_16,
+          Stage.QUARTERS,
+          Stage.SEMIS,
+          Stage.FINAL
+        ];
+
+        const firstUnplayedStage = STAGE_ORDER.find((stage) => {
+          const stageMatches = matches.filter((m) => {
+            if (stage === Stage.FINAL) {
+              return m.stage === Stage.FINAL || m.stage === Stage.THIRD_PLACE;
+            }
+            return m.stage === stage;
+          });
+          return stageMatches.some((m) => m.scoreA === null || m.scoreB === null);
+        });
+
+        if (firstUnplayedStage) {
+          setSelectedStage(firstUnplayedStage);
+        }
+        hasAutoSelectedRef.current = true;
+      }
+    }
+    lastTabRef.current = activeTab;
+  }, [activeTab, matches]);
 
   // Update Score Handler & save
   const handleUpdateScore = (matchId: string, scoreA: number | null, scoreB: number | null) => {
@@ -137,7 +192,8 @@ export default function App() {
     localStorage.setItem("wc2026_teams", JSON.stringify(INITIAL_TEAMS));
     localStorage.setItem("wc2026_matches", JSON.stringify(defaultMatches));
     setSelectedStage(Stage.GROUPS);
-    setActiveTab("CALENDAR");
+    setActiveTab("HOME");
+    setShowResetConfirm(false);
   };
 
   // Computed metrics
@@ -156,14 +212,69 @@ export default function App() {
         completedMatches={completedCount}
         totalTeams={teams.length}
         activeTeams={activeTeamsCount}
-        onReset={handleResetAll}
+        onReset={() => setShowResetConfirm(true)}
         onShowNotice={() => setShowHowTo(true)}
+        onShowSettings={() => setShowSettings(true)}
       />
 
       {/* Scrollable area for content and footer to keep Bottom Nav consistently fixed in viewport */}
-      <div className="flex-1 overflow-y-auto min-h-0 w-full pb-24 pb-[calc(6.5rem+env(safe-area-inset-bottom))]">
+      <div ref={mainScrollRef} className="flex-1 overflow-y-auto min-h-0 w-full pb-24 pb-[calc(6.5rem+env(safe-area-inset-bottom))]">
         {/* Main Container */}
         <main className="max-w-7xl mx-auto px-3 sm:px-4 py-4 sm:py-6 space-y-4">
+          {/* Reset Confirmation Modal */}
+          {showResetConfirm && (
+            <div className="fixed inset-0 bg-slate-950/85 backdrop-blur-md z-[110] flex items-center justify-center p-4 animate-fade-in">
+              <div className="bg-slate-900 border border-slate-800 rounded-2xl p-5 sm:p-6 max-w-md w-full shadow-2xl relative">
+                <div className="flex flex-col items-center text-center space-y-4">
+                  <div className="p-3 bg-rose-600/20 text-rose-400 rounded-full">
+                    <AlertTriangle className="w-10 h-10 animate-pulse" />
+                  </div>
+                  <div>
+                    <h3 className="text-lg font-bold text-slate-100">Réinitialiser les données ?</h3>
+                    <p className="text-xs text-slate-400 mt-2 leading-relaxed">
+                      Cette action va réinitialiser l'intégralité du tournoi. Les scores, les cartons jaunes/rouges et les rangs FIFA d'origine seront remis à zéro.
+                    </p>
+                  </div>
+                  <div className="bg-slate-950/40 border border-slate-800/80 p-3 rounded-xl w-full text-left text-[11px] text-slate-300 space-y-1">
+                    <span className="font-semibold text-rose-400 block mb-1">Éléments qui seront remis à zéro :</span>
+                    <p>• Tous les scores de match et l'arbre des phases finales</p>
+                    <p>• L'ensemble des cartons jaunes et rouges encodés</p>
+                    <p>• Les rangs FIFA des équipes à leurs valeurs initiales d'origine</p>
+                  </div>
+                  <div className="flex items-center gap-3 w-full pt-2">
+                    <button
+                      onClick={() => setShowResetConfirm(false)}
+                      className="flex-1 py-2.5 text-xs font-semibold bg-slate-800 hover:bg-slate-700 active:bg-slate-900 border border-slate-700 hover:border-slate-600 text-slate-300 rounded-lg transition-colors cursor-pointer"
+                    >
+                      Annuler
+                    </button>
+                    <button
+                      onClick={handleResetAll}
+                      className="flex-1 py-2.5 text-xs font-bold bg-rose-600 hover:bg-rose-500 active:bg-rose-700 text-white rounded-lg transition-colors shadow-sm flex items-center justify-center gap-1.5 cursor-pointer"
+                    >
+                      <RotateCcw className="w-4 h-4" />
+                      Réinitialiser
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* Settings Modal */}
+          <SettingsModal
+            isOpen={showSettings}
+            onClose={() => setShowSettings(false)}
+            teams={teams}
+            matches={matches}
+            onUpdateData={(updatedTeamsList, updatedMatchesList) => {
+              setTeams(updatedTeamsList);
+              setMatches(updatedMatchesList);
+              localStorage.setItem("wc2026_teams", JSON.stringify(updatedTeamsList));
+              localStorage.setItem("wc2026_matches", JSON.stringify(updatedMatchesList));
+            }}
+          />
+
           {/* Notice Modal */}
           {showHowTo && (
             <div className="fixed inset-0 bg-slate-950/85 backdrop-blur-md z-[100] flex items-center justify-center p-4 animate-fade-in">
@@ -214,36 +325,57 @@ export default function App() {
 
           {/* Quick phase selection links if on Calendar view */}
           {activeTab === "CALENDAR" && (
-            <div className="flex flex-col gap-2 bg-slate-900/40 p-3 rounded-xl border border-slate-800/80">
-              <span className="text-[11px] text-slate-400 font-semibold pl-1 uppercase tracking-wider">Phases du Tournoi</span>
-              <div className="flex items-center gap-1.5 overflow-x-auto pb-1 scrollbar-none-touch">
-                {[
-                  { stage: Stage.GROUPS, text: "Groupes" },
-                  { stage: Stage.ROUND_32, text: "16èmes" },
-                  { stage: Stage.ROUND_16, text: "8èmes" },
-                  { stage: Stage.QUARTERS, text: "Quarts" },
-                  { stage: Stage.SEMIS, text: "Demis" },
-                  { stage: Stage.FINAL, text: "Finales" },
-                ].map((item) => (
-                  <button
-                    key={item.stage}
-                    onClick={() => setSelectedStage(item.stage)}
-                    className={`px-3 py-1.5 rounded-lg text-xs font-bold whitespace-nowrap transition-colors border ${
-                      selectedStage === item.stage
-                        ? "bg-emerald-600 border-emerald-500 text-white shadow"
-                        : "bg-slate-950/40 text-slate-400 border-transparent hover:text-slate-200 hover:bg-slate-900/80"
-                    }`}
-                  >
-                    {item.text}
-                  </button>
-                ))}
+            <div className="sticky top-0 z-20 flex flex-col gap-2 bg-slate-900/95 backdrop-blur-md p-3 rounded-xl border border-slate-800/80 shadow-md">
+              <div className="flex items-center justify-between">
+                <span className="text-[11px] text-slate-400 font-semibold pl-1 uppercase tracking-wider">Phases du Tournoi</span>
+                <button
+                  type="button"
+                  onClick={() => setIsPhasesExpanded(!isPhasesExpanded)}
+                  className="p-1 hover:bg-slate-800 text-slate-400 hover:text-slate-100 rounded-lg transition-colors cursor-pointer"
+                  title={isPhasesExpanded ? "Masquer l'encadré" : "Afficher l'encadré"}
+                >
+                  {isPhasesExpanded ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
+                </button>
               </div>
+              
+              {isPhasesExpanded && (
+                <div className="flex items-center gap-1.5 overflow-x-auto pb-1 scrollbar-none-touch">
+                  {[
+                    { stage: Stage.GROUPS, text: "Groupes" },
+                    { stage: Stage.ROUND_32, text: "16èmes" },
+                    { stage: Stage.ROUND_16, text: "8èmes" },
+                    { stage: Stage.QUARTERS, text: "Quarts" },
+                    { stage: Stage.SEMIS, text: "Demis" },
+                    { stage: Stage.FINAL, text: "Finales" },
+                  ].map((item) => (
+                    <button
+                      key={item.stage}
+                      onClick={() => setSelectedStage(item.stage)}
+                      className={`px-3 py-1.5 rounded-lg text-xs font-bold whitespace-nowrap transition-colors border ${
+                        selectedStage === item.stage
+                          ? "bg-emerald-600 border-emerald-500 text-white shadow"
+                          : "bg-slate-950/40 text-slate-400 border-transparent hover:text-slate-200 hover:bg-slate-900/80"
+                      }`}
+                    >
+                      {item.text}
+                    </button>
+                  ))}
+                </div>
+              )}
             </div>
           )}
 
           {/* Content Section */}
           <div className="transition-all duration-300">
-            {activeTab === "CALENDAR" ? (
+            {activeTab === "HOME" ? (
+              <HomeTab
+                teams={teams}
+                matches={matches}
+                onUpdateScore={handleUpdateScore}
+                onUpdateTeams={handleUpdateTeams}
+                onUpdateCards={handleUpdateCards}
+              />
+            ) : activeTab === "CALENDAR" ? (
               <div className="space-y-4">
                 {/* Header Title for selected phase */}
                 <div className="flex items-center justify-between">
@@ -292,6 +424,20 @@ export default function App() {
       {/* Sticky Bottom Navigation Bar - ALWAYS viewable at the viewport bottom on both mobile & desktop */}
       <div className="fixed bottom-0 left-0 right-0 bg-slate-950/95 backdrop-blur-md border-t border-slate-900/90 py-2.5 pb-[calc(10px+env(safe-area-inset-bottom))] z-50 flex shadow-2xl justify-center">
         <div className="max-w-md w-full flex justify-around px-4">
+          <button
+            onClick={() => {
+              setActiveTab("HOME");
+            }}
+            className={`flex flex-col items-center justify-center p-2 rounded-xl transition-all ${
+              activeTab === "HOME" 
+                ? "text-emerald-400 bg-slate-900/60 scale-105" 
+                : "text-slate-500 hover:text-slate-300"
+            }`}
+          >
+            <Home className="w-5 h-5" />
+            <span className="text-[10px] mt-1 font-bold">Accueil</span>
+          </button>
+
           <button
             onClick={() => {
               setActiveTab("CALENDAR");
