@@ -18,6 +18,7 @@ export default function App() {
   const [showSettings, setShowSettings] = useState(false);
   const [showResetConfirm, setShowResetConfirm] = useState(false);
   const [isPhasesExpanded, setIsPhasesExpanded] = useState(true);
+  const [showBottomNav, setShowBottomNav] = useState(false);
   
   // Ref to the main scrollable container to force scroll-to-top on tab changes
   const mainScrollRef = useRef<HTMLDivElement>(null);
@@ -421,8 +422,35 @@ export default function App() {
         </footer>
       </div>
 
+      {/* Bouton flèche pour afficher ou masquer les onglets en bas de page */}
+      <div className={`fixed z-50 transition-all duration-300 left-1/2 -translate-x-1/2 flex flex-col items-center ${
+        showBottomNav 
+          ? "bottom-[calc(76px+env(safe-area-inset-bottom))]" 
+          : "bottom-3"
+      }`}>
+        <button
+          onClick={() => setShowBottomNav(!showBottomNav)}
+          className="bg-slate-900 border border-slate-800 hover:bg-slate-800 text-emerald-400 font-bold p-1.5 rounded-full shadow-lg hover:text-emerald-300 transition-all cursor-pointer flex items-center justify-center gap-1.5 text-[10px] px-3.5"
+          title={showBottomNav ? "Masquer la navigation" : "Afficher la navigation"}
+        >
+          {showBottomNav ? (
+            <>
+              <ChevronDown className="w-3.5 h-3.5" />
+              <span>Masquer</span>
+            </>
+          ) : (
+            <>
+              <ChevronUp className="w-3.5 h-3.5" />
+              <span>Afficher les Onglets</span>
+            </>
+          )}
+        </button>
+      </div>
+
       {/* Sticky Bottom Navigation Bar - ALWAYS viewable at the viewport bottom on both mobile & desktop */}
-      <div className="fixed bottom-0 left-0 right-0 bg-slate-950/95 backdrop-blur-md border-t border-slate-900/90 py-2.5 pb-[calc(10px+env(safe-area-inset-bottom))] z-50 flex shadow-2xl justify-center">
+      <div className={`fixed bottom-0 left-0 right-0 bg-slate-950/95 backdrop-blur-md border-t border-slate-900/90 py-2.5 pb-[calc(10px+env(safe-area-inset-bottom))] z-50 flex shadow-2xl justify-center transition-transform duration-300 ${
+        showBottomNav ? "translate-y-0" : "translate-y-full"
+      }`}>
         <div className="max-w-md w-full flex justify-around px-4">
           <button
             onClick={() => {

@@ -236,7 +236,7 @@ export default function HomeTab({
             </div>
 
             {/* Core Match Row displaying Team A vs Team B */}
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6 items-center py-2">
+            <div className="grid grid-cols-1 sm:grid-cols-3 landscape:grid-cols-3 gap-6 items-center py-2">
               
               {/* Team A Input & Flag Column */}
               <div className="flex flex-col items-center text-center space-y-3.5">
@@ -397,7 +397,7 @@ export default function HomeTab({
               </div>
 
               {/* Team B Input & Flag Column */}
-              <div className="flex flex-col items-center text-center space-y-3.5 border-t md:border-t-0 border-slate-800/50 pt-5 md:pt-0">
+              <div className="flex flex-col items-center text-center space-y-3.5 border-t sm:border-t-0 landscape:border-t-0 border-slate-800/50 pt-5 sm:pt-0 landscape:pt-0">
                 {activeTeamB ? (
                   <div className="flex flex-col items-center">
                     <Flag emoji={activeTeamB.flag} name={activeTeamB.name} className="w-16 h-16 mb-2.5 drop-shadow-xl animate-fade-in" />
