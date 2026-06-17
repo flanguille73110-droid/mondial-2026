@@ -75,36 +75,59 @@ export default function HomeTab({
   const nowMs = currentTime.getTime();
   const matchDurationMs = 120 * 60 * 1000; // 2 hours
 
-  // 1. Check for matches in progress right now
-  const matchesInProgress = sortedMatchesWithDate.filter(({ dateObj }) => {
-    const start = dateObj.getTime();
-    const end = start + matchDurationMs;
-    return nowMs >= start && nowMs <= end;
-  });
+  // Trouver tous les matchs qui ont démarré ou sont déjà passés
+  const startedMatches = sortedMatchesWithDate.filter(({ dateObj }) => dateObj.getTime() <= nowMs);
 
   let activeMatch: Match | null = null;
   let statusText = "";
   let isLive = false;
 
-  if (matchesInProgress.length > 0) {
-    activeMatch = matchesInProgress[0].match;
-    statusText = "RENCONTRE ACTUELLEMENT EN COURS";
-    isLive = true;
-  } else {
-    // 2. Find first upcoming match (starting after currentTime)
-    const upcomingMatches = sortedMatchesWithDate.filter(({ dateObj }) => {
-      return dateObj.getTime() > nowMs;
-    });
-
-    if (upcomingMatches.length > 0) {
-      activeMatch = upcomingMatches[0].match;
+  if (startedMatches.length === 0) {
+    // Si aucun match n'a encore commencé, afficher le tout premier match
+    if (sortedMatchesWithDate.length > 0) {
+      activeMatch = sortedMatchesWithDate[0].match;
       statusText = "PROCHAINE RENCONTRE À VENIR";
       isLive = false;
+    }
+  } else {
+    // Récupérer le match le plus récent qui a commencé
+    const latestStartedIndex = startedMatches.length - 1;
+    const latestStarted = startedMatches[latestStartedIndex];
+    
+    // Vérifier s'il y a un match suivant dans la liste
+    const nextMatchItem = sortedMatchesWithDate[latestStartedIndex + 1];
+    
+    if (nextMatchItem) {
+      const nextStartMs = nextMatchItem.dateObj.getTime();
+      const scoreIsEntered = latestStarted.match.scoreA !== null && latestStarted.match.scoreB !== null;
+      const isWithin15MinOfNext = nowMs >= nextStartMs - 15 * 60 * 1000;
+
+      // S'affiche jusqu'à 15 min avant le début du prochain, ou si le score de Match A est saisi
+      if (scoreIsEntered || isWithin15MinOfNext) {
+        activeMatch = nextMatchItem.match;
+      } else {
+        activeMatch = latestStarted.match;
+      }
     } else {
-      // 3. Last match of tournament fallback
-      if (sortedMatchesWithDate.length > 0) {
-        activeMatch = sortedMatchesWithDate[sortedMatchesWithDate.length - 1].match;
-        statusText = "DERNIÈRE RENCONTRE DU TOURNOI";
+      // S'il n'y a pas de match après, afficher le dernier match commencé
+      activeMatch = latestStarted.match;
+    }
+
+    // Calculer le statut précis de la rencontre active
+    if (activeMatch) {
+      const activeMatchDate = sortedMatchesWithDate.find(m => m.match.id === activeMatch?.id)?.dateObj || new Date();
+      const activeStart = activeMatchDate.getTime();
+      const activeEnd = activeStart + matchDurationMs;
+
+      if (nowMs >= activeStart && nowMs <= activeEnd) {
+        statusText = "RENCONTRE ACTUELLEMENT EN COURS";
+        isLive = true;
+      } else if (nowMs < activeStart) {
+        statusText = "PROCHAINE RENCONTRE À VENIR";
+        isLive = false;
+      } else {
+        const scoreEntered = activeMatch.scoreA !== null && activeMatch.scoreB !== null;
+        statusText = scoreEntered ? "RENCONTRE TERMINÉE" : "RENCONTRE EN ATTENTE DE SAISIE DU SCORE";
         isLive = false;
       }
     }
