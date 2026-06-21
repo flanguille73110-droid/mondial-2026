@@ -99,11 +99,10 @@ export default function HomeTab({
     
     if (nextMatchItem) {
       const nextStartMs = nextMatchItem.dateObj.getTime();
-      const scoreIsEntered = latestStarted.match.scoreA !== null && latestStarted.match.scoreB !== null;
       const isWithin15MinOfNext = nowMs >= nextStartMs - 15 * 60 * 1000;
 
-      // S'affiche jusqu'à 15 min avant le début du prochain, ou si le score de Match A est saisi
-      if (scoreIsEntered || isWithin15MinOfNext) {
+      // Reste affiché comme pavé actif jusqu'à 15 minutes avant le coup d'envoi du match suivant, même si le score est renseigné
+      if (isWithin15MinOfNext) {
         activeMatch = nextMatchItem.match;
       } else {
         activeMatch = latestStarted.match;
