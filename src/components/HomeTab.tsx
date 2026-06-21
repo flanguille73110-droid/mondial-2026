@@ -54,6 +54,7 @@ export default function HomeTab({
 }: HomeTabProps) {
   // Heure réelle en France mise à jour en temps réel
   const [currentTime, setCurrentTime] = useState<Date>(() => new Date());
+  const [showForcedNext, setShowForcedNext] = useState(false);
 
   useEffect(() => {
     // Horloge mise à jour dynamiquement à chaque seconde
@@ -81,6 +82,7 @@ export default function HomeTab({
   let activeMatch: Match | null = null;
   let statusText = "";
   let isLive = false;
+  let canShowNextButton = false;
 
   if (startedMatches.length === 0) {
     // Si aucun match n'a encore commencé, afficher le tout premier match
@@ -100,9 +102,20 @@ export default function HomeTab({
     if (nextMatchItem) {
       const nextStartMs = nextMatchItem.dateObj.getTime();
       const isWithin15MinOfNext = nowMs >= nextStartMs - 15 * 60 * 1000;
+      
+      // On peut proposer de passer à la prochaine rencontre si le score du match actif actuel est renseigné,
+      // qu'on n'est pas déjà à moins de 15 min de la prochaine rencontre, et qu'on ne l'affiche pas déjà de force
+      const latestScoreIsEntered = latestStarted.match.scoreA !== null && latestStarted.match.scoreB !== null;
+      if (latestScoreIsEntered && !isWithin15MinOfNext && !showForcedNext) {
+        canShowNextButton = true;
+      }
+
+      // Si le score du match précédent a été effacé par l'utilisateur, on annule l'activation forcée
+      const actualShowForced = showForcedNext && latestScoreIsEntered;
 
       // Reste affiché comme pavé actif jusqu'à 15 minutes avant le coup d'envoi du match suivant, même si le score est renseigné
-      if (isWithin15MinOfNext) {
+      // OU si l'utilisateur a cliqué sur "Prochaine rencontre" et que le score de la rencontre actuelle est bien saisi
+      if (isWithin15MinOfNext || actualShowForced) {
         activeMatch = nextMatchItem.match;
       } else {
         activeMatch = latestStarted.match;
@@ -223,11 +236,21 @@ export default function HomeTab({
       {/* Main Focus Match Area */}
       {activeMatch ? (
         <div className="space-y-4">
-          <div className="flex items-center gap-2 pl-1 mb-2">
-            <span className="w-2 h-4 bg-emerald-500 rounded"></span>
-            <h3 className="text-sm font-black text-slate-200 uppercase tracking-wider">
-              {statusText}
-            </h3>
+          <div className="flex items-center justify-between pl-1 mb-2">
+            <div className="flex items-center gap-2">
+              <span className="w-2 h-4 bg-emerald-500 rounded"></span>
+              <h3 className="text-sm font-black text-slate-200 uppercase tracking-wider">
+                {statusText}
+              </h3>
+            </div>
+            {showForcedNext && (
+              <button
+                onClick={() => setShowForcedNext(false)}
+                className="text-[10px] bg-slate-800 hover:bg-slate-700 hover:text-slate-200 border border-slate-700 text-slate-300 font-bold px-2.5 py-1 rounded-lg transition-colors cursor-pointer"
+              >
+                ← Voir la rencontre en cours
+              </button>
+            )}
           </div>
 
           <div
@@ -514,6 +537,18 @@ export default function HomeTab({
                 <span>
                   Match mis à jour avec succès. Le score de <strong>{activeMatch.scoreA} - {activeMatch.scoreB}</strong> est répercuté en direct dans le calendrier et le classement.
                 </span>
+              </div>
+            )}
+
+            {/* Bouton Prochaine Rencontre si la rencontre courante a son score renseigné */}
+            {canShowNextButton && (
+              <div className="mt-4 pt-4 border-t border-slate-800/60 flex justify-center">
+                <button
+                  onClick={() => setShowForcedNext(true)}
+                  className="bg-emerald-600 hover:bg-emerald-500 text-slate-950 hover:text-slate-900 font-extrabold text-xs px-5 py-2.5 rounded-xl shadow-lg shadow-emerald-950/40 hover:shadow-emerald-900/30 transition-all flex items-center gap-2 cursor-pointer border border-emerald-500/30"
+                >
+                  Prochaine rencontre ➔
+                </button>
               </div>
             )}
           </div>
