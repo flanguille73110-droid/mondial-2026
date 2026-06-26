@@ -161,6 +161,48 @@ export default function App() {
     localStorage.setItem("wc2026_matches", JSON.stringify(updatedMatches));
   };
 
+  const handleImportTeams = (stage: Stage) => {
+    let previousStage: Stage;
+    switch(stage) {
+      case Stage.ROUND_16: previousStage = Stage.ROUND_32; break;
+      case Stage.QUARTERS: previousStage = Stage.ROUND_16; break;
+      case Stage.SEMIS: previousStage = Stage.QUARTERS; break;
+      case Stage.FINAL: previousStage = Stage.SEMIS; break;
+      default: return;
+    }
+
+    const previousMatches = matches.filter(m => m.stage === previousStage);
+    const currentMatches = matches.map(match => {
+      if (match.stage !== stage) return match;
+
+      // Extract match numbers from placeholders: "Vainqueur Match 89"
+      const matchNumberA = match.teamANamePlaceholder ? parseInt(match.teamANamePlaceholder.replace(/\D/g, "")) : null;
+      const matchNumberB = match.teamBNamePlaceholder ? parseInt(match.teamBNamePlaceholder.replace(/\D/g, "")) : null;
+
+      let teamAId = match.teamAId;
+      let teamBId = match.teamBId;
+
+      if (matchNumberA && !teamAId) {
+        const prevMatch = previousMatches.find(m => m.matchNumber === matchNumberA);
+        if (prevMatch && prevMatch.scoreA !== null && prevMatch.scoreB !== null) {
+          teamAId = prevMatch.scoreA > prevMatch.scoreB ? prevMatch.teamAId : prevMatch.teamBId;
+        }
+      }
+
+      if (matchNumberB && !teamBId) {
+        const prevMatch = previousMatches.find(m => m.matchNumber === matchNumberB);
+        if (prevMatch && prevMatch.scoreA !== null && prevMatch.scoreB !== null) {
+          teamBId = prevMatch.scoreA > prevMatch.scoreB ? prevMatch.teamAId : prevMatch.teamBId;
+        }
+      }
+
+      return { ...match, teamAId, teamBId };
+    });
+
+    setMatches(currentMatches);
+    localStorage.setItem("wc2026_matches", JSON.stringify(currentMatches));
+  };
+
   // Validate match
   const handleValidateMatch = (matchId: string) => {
     const updatedMatches = matches.map((m) =>
@@ -409,6 +451,7 @@ export default function App() {
                   onUpdateScore={handleUpdateScore}
                   onUpdateTeams={handleUpdateTeams}
                   onUpdateCards={handleUpdateCards}
+                  onImportTeams={handleImportTeams}
                 />
               </div>
             ) : activeTab === "STANDINGS" ? (

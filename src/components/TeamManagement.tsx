@@ -79,7 +79,11 @@ export default function TeamManagement({ teams, onToggleEliminated, onChangeGrou
     let result = teams.filter((team) => {
       const matchesSearch = team.name.toLowerCase().includes(search.toLowerCase()) || 
                             team.id.toLowerCase().includes(search.toLowerCase());
-      const matchesGroup = selectedGroup === "Tous" || team.group === selectedGroup;
+      const matchesGroup = selectedGroup === "Tous" 
+        ? true 
+        : selectedGroup === "Éliminées"
+        ? team.eliminated
+        : team.group === selectedGroup;
       return matchesSearch && matchesGroup;
     });
 
@@ -400,6 +404,16 @@ export default function TeamManagement({ teams, onToggleEliminated, onChangeGrou
             <span>Filtrer par Groupe :</span>
           </div>
           <div className="flex items-center gap-1.5 overflow-x-auto pb-2 scrollbar-none-touch -mx-3 px-3">
+            <button
+              onClick={() => setSelectedGroup("Éliminées")}
+              className={`px-3 py-1.5 rounded-lg text-xs font-semibold whitespace-nowrap transition-colors border ${
+                selectedGroup === "Éliminées"
+                  ? "bg-rose-600 text-white border-rose-500 shadow-md shadow-rose-950/40"
+                  : "bg-rose-950/40 text-rose-300 border-rose-900/80 hover:text-rose-100 hover:bg-rose-900/50"
+              }`}
+            >
+              Éliminées
+            </button>
             {groupsList.map((g) => (
               <button
                 key={g}

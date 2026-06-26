@@ -10,6 +10,7 @@ interface MatchListProps {
   onUpdateScore: (matchId: string, scoreA: number | null, scoreB: number | null) => void;
   onUpdateTeams: (matchId: string, teamAId: string | null, teamBId: string | null) => void;
   onUpdateCards: (matchId: string, type: "yellow" | "red", team: "A" | "B", val: number | null) => void;
+  onImportTeams: (stage: Stage) => void;
 }
 
 export default function MatchList({
@@ -19,6 +20,7 @@ export default function MatchList({
   onUpdateScore,
   onUpdateTeams,
   onUpdateCards,
+  onImportTeams,
 }: MatchListProps) {
   const [selectedGroupFilter, setSelectedGroupFilter] = useState<string>("Tous");
 
@@ -131,13 +133,10 @@ export default function MatchList({
       )}
 
       {/* Main listing */}
-      {selectedStage === Stage.ROUND_32 && (
+      {[Stage.ROUND_32, Stage.ROUND_16, Stage.QUARTERS, Stage.SEMIS, Stage.FINAL].includes(selectedStage) && (
         <div className="flex justify-center mb-4">
           <button
-            onClick={() => {
-              // TODO: Implémenter la logique d'importation des équipes
-              alert("Fonctionnalité d'importation des équipes à venir");
-            }}
+            onClick={() => onImportTeams(selectedStage)}
             className="bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs px-4 py-2 rounded-lg shadow transition-all cursor-pointer"
           >
             Importer les équipes
