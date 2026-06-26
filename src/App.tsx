@@ -166,10 +166,6 @@ export default function App() {
       // Calculer les classements des groupes
       const groupStats: Record<string, any[]> = {};
       
-      // ... (simplification for brevity: reusing Standings logic)
-      // I will implement a simplified standings calculation here
-      // to avoid massive code duplication
-      
       const groupMatches = matches.filter(m => m.stage === Stage.GROUPS);
       const teamsInGroups = new Map<string, any[]>();
       
@@ -200,6 +196,17 @@ export default function App() {
         }
       });
       
+      // Check if 3rd matches played for each group
+      const groupsFullyPlayed = new Set<string>();
+      "ABCDEFGHIJKL".split('').forEach(g => {
+        const matchesInGroup = groupMatches.filter(m => m.group === g);
+        // Assuming 3 matches in each group for 4 teams
+        const played = matchesInGroup.filter(m => m.scoreA !== null && m.scoreB !== null).length;
+        if (played === 6) {
+          groupsFullyPlayed.add(g);
+        }
+      });
+      
       // Sort teams
       teamsInGroups.forEach((groupTeams, g) => {
         groupTeams.sort((a, b) => b.points - a.points || b.goalDiff - a.goalDiff);
@@ -219,7 +226,7 @@ export default function App() {
 
         if (match.teamANamePlaceholder && !teamAId) {
           const res = parseLabel(match.teamANamePlaceholder);
-          if (res) {
+          if (res && groupsFullyPlayed.has(res.group)) {
             const groupTeams = teamsInGroups.get(res.group);
             if (groupTeams) {
               const idx = res.position === "1er" ? 0 : 1;
@@ -230,7 +237,7 @@ export default function App() {
         
         if (match.teamBNamePlaceholder && !teamBId) {
           const res = parseLabel(match.teamBNamePlaceholder);
-          if (res) {
+          if (res && groupsFullyPlayed.has(res.group)) {
             const groupTeams = teamsInGroups.get(res.group);
             if (groupTeams) {
               const idx = res.position === "1er" ? 0 : 1;
