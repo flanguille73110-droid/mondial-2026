@@ -39,7 +39,7 @@ const FIFA_RANKINGS: Record<string, number> = {
 
 export default function Standings({ teams, matches, onToggleEliminated }: StandingsProps) {
   const [selectedGroup, setSelectedGroup] = useState<string>("ALL");
-  const [rankingMode, setRankingMode] = useState<"GROUP" | "GLOBAL">("GROUP");
+  const [rankingMode, setRankingMode] = useState<"GROUP" | "GLOBAL" | "THIRD_PLACES">("GROUP");
   const [searchTerm, setSearchTerm] = useState<string>("");
 
   const groupsList = ["A", "B", "C", "D", "E", "F", "G", "H", "I", "J", "K", "L"];
@@ -155,6 +155,25 @@ export default function Standings({ teams, matches, onToggleEliminated }: Standi
 
     return standingsByGroup;
   }, [teams, matches]);
+  
+  const thirdPlacesStandings = useMemo(() => {
+    const thirds: (TeamStats & { group: string })[] = [];
+    groupsList.forEach(grp => {
+      const stats = groupStandings[grp];
+      if (stats && stats.length >= 3) {
+        thirds.push({...stats[2], group: grp});
+      }
+    });
+    
+    thirds.sort((x, y) => {
+      if (y.points !== x.points) return y.points - x.points;
+      if (y.goalDiff !== x.goalDiff) return y.goalDiff - x.goalDiff;
+      if (y.goalsFor !== x.goalsFor) return y.goalsFor - x.goalsFor;
+      if (x.fairPlayPenalty !== y.fairPlayPenalty) return x.fairPlayPenalty - y.fairPlayPenalty;
+      return x.fifaRanking - y.fifaRanking;
+    });
+    return thirds;
+  }, [groupStandings]);
 
   // Compute global standings of all teams
   const globalStandings = useMemo(() => {
@@ -205,6 +224,23 @@ export default function Standings({ teams, matches, onToggleEliminated }: Standi
     );
   }, [globalStandings, searchTerm]);
 
+  // Helper to determine form
+  const getTeamForm = (teamId: string) => {
+    // Only look at group matches for now as per requirements
+    const teamMatches = matches.filter(m => m.stage === Stage.GROUPS && (m.teamAId === teamId || m.teamBId === teamId));
+    return teamMatches.map(m => {
+      if (m.scoreA === null || m.scoreB === null) return { result: '?', color: 'bg-slate-400' };
+      
+      const isTeamA = m.teamAId === teamId;
+      const score = isTeamA ? m.scoreA : m.scoreB;
+      const opponentScore = isTeamA ? m.scoreB : m.scoreA;
+      
+      if (score > opponentScore) return { result: 'V', color: 'bg-emerald-600' };
+      if (score < opponentScore) return { result: 'D', color: 'bg-rose-600' };
+      return { result: 'N', color: 'bg-amber-500' };
+    });
+  };
+
   const displayedGroups = selectedGroup === "ALL" ? groupsList : [selectedGroup];
 
   return (
@@ -233,6 +269,17 @@ export default function Standings({ teams, matches, onToggleEliminated }: Standi
           >
             <Award className="w-3.5 h-3.5" />
             Classement Global
+          </button>
+          <button
+            onClick={() => setRankingMode("THIRD_PLACES")}
+            className={`flex-1 sm:flex-initial flex items-center justify-center gap-2 px-5 py-2 text-xs font-bold rounded-lg transition-all ${
+              rankingMode === "THIRD_PLACES"
+                ? "bg-slate-800 text-emerald-400 shadow-md border border-slate-700/50"
+                : "text-slate-400 hover:text-slate-200"
+            }`}
+          >
+            <Award className="w-3.5 h-3.5" />
+            Classement des 3èmes
           </button>
         </div>
       </div>
@@ -334,11 +381,11 @@ export default function Standings({ teams, matches, onToggleEliminated }: Standi
                             <th className="py-2 pr-1 w-6 text-center">Pos</th>
                             <th className="py-2">Équipe</th>
                             <th className="py-2 text-center w-8" title="Matchs Joués">MJ</th>
-                            <th className="py-2 text-center w-14" title="Gagnés / Nuls / Perdus">G-N-P</th>
                             <th className="py-2 text-center w-10" title="Buts Marqués / Encaissés">Buts</th>
                             <th className="py-2 text-center w-8" title="Différence de buts">Diff</th>
                             <th className="py-2 text-center w-12" title="Cartons jaunes et rouges reçus">Cartons</th>
                             <th className="py-2 text-right w-8 pl-1 font-bold">Pts</th>
+                            <th className="py-2 text-center w-16 pl-4">État de forme</th>
                           </tr>
                         </thead>
                         <tbody className="divide-y divide-slate-800/30">
@@ -346,6 +393,7 @@ export default function Standings({ teams, matches, onToggleEliminated }: Standi
                             const rankNumber = idx + 1;
                             // Qualifed if rank 1 or 2
                             const isQualifying = rankNumber <= 2;
+                            const form = getTeamForm(team.id);
 
                             return (
                               <tr
@@ -380,11 +428,6 @@ export default function Standings({ teams, matches, onToggleEliminated }: Standi
                                 {/* Played */}
                                 <td className="py-2.5 text-center font-mono text-slate-300">
                                   {team.played}
-                                </td>
-
-                                {/* G - N - P */}
-                                <td className="py-2.5 text-center font-mono text-slate-400 text-[11px]">
-                                  {team.wins}-{team.draws}-{team.losses}
                                 </td>
 
                                 {/* Goals for-against */}
@@ -423,6 +466,20 @@ export default function Standings({ teams, matches, onToggleEliminated }: Standi
                                 <td className="py-2.5 text-right pl-1 font-mono font-extrabold text-sm text-emerald-400">
                                   {team.points}
                                 </td>
+                                
+                                {/* Form */}
+                                <td className="py-2.5 text-center pl-4">
+                                  <div className="flex justify-center gap-1">
+                                    {form.map((f, i) => (
+                                      <span
+                                        key={i}
+                                        className={`text-[10px] w-4 h-4 flex items-center justify-center font-bold text-white rounded ${f.color}`}
+                                      >
+                                        {f.result}
+                                      </span>
+                                    ))}
+                                  </div>
+                                </td>
                               </tr>
                             );
                           })}
@@ -446,6 +503,68 @@ export default function Standings({ teams, matches, onToggleEliminated }: Standi
             })}
           </div>
         </>
+      ) : rankingMode === "THIRD_PLACES" ? (
+        <div className="bg-slate-900/60 border border-slate-800/80 rounded-xl p-4 sm:p-5 shadow-lg flex flex-col gap-4">
+          <h3 className="text-sm font-extrabold text-slate-100 border-b border-slate-800/80 pb-4">
+            CLASSEMENT DES 3ÈMES (Qualifiés si dans le Top 8)
+          </h3>
+          <div className="overflow-x-auto">
+            <table className="w-full text-left text-xs font-sans whitespace-nowrap">
+              <thead>
+                <tr className="text-slate-400 font-bold border-b border-slate-800/50 pb-2.5 text-[11px]">
+                  <th className="py-3 px-2 w-12 text-center">Rang</th>
+                  <th className="py-3 px-2">Équipe</th>
+                  <th className="py-3 px-2 text-center">Groupe</th>
+                  <th className="py-3 px-2 text-center">MJ</th>
+                  <th className="py-3 px-2 text-center">G-N-P</th>
+                  <th className="py-3 px-2 text-center">Buts</th>
+                  <th className="py-3 px-2 text-center">Diff</th>
+                  <th className="py-3 px-2 text-center">Cartons</th>
+                  <th className="py-3 px-2 text-center">Rank FIFA</th>
+                  <th className="py-3 px-2 text-right">Pts</th>
+                  <th className="py-3 px-2 text-center">État de forme</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-slate-800/20">
+                {thirdPlacesStandings.map((team, idx) => (
+                  <tr key={team.id} className={idx < 8 ? "bg-emerald-950/20" : ""}>
+                    <td className="py-3 px-2 text-center">
+                      <span className={`inline-flex items-center justify-center w-6 h-6 rounded-md font-bold ${idx < 8 ? "border-2 border-emerald-500 text-emerald-400" : "text-slate-400"}`}>
+                        {idx + 1}
+                      </span>
+                    </td>
+                    <td className="py-3 px-2 flex items-center gap-2">
+                      <Flag emoji={team.flag} name={team.name} className="w-5 h-5 rounded-sm" />
+                      {team.name}
+                    </td>
+                    <td className="py-3 px-2 text-center">Gr. {team.group}</td>
+                    <td className="py-3 px-2 text-center">{team.played}</td>
+                    <td className="py-3 px-2 text-center">{team.wins}-{team.draws}-{team.losses}</td>
+                    <td className="py-3 px-2 text-center">{team.goalsFor}:{team.goalsAgainst}</td>
+                    <td className="py-3 px-2 text-center">{team.goalDiff}</td>
+                    <td className="py-3 px-2 text-center">
+                        <div className="flex justify-center gap-1">
+                          <span className="text-amber-400">{team.yellowCards}</span>
+                          <span className="text-rose-600">{team.redCards}</span>
+                        </div>
+                    </td>
+                    <td className="py-3 px-2 text-center">#{team.fifaRanking}</td>
+                    <td className="py-3 px-2 text-right font-bold text-emerald-400">{team.points}</td>
+                    <td className="py-3 px-2 text-center">
+                      <div className="flex justify-center gap-1">
+                        {getTeamForm(team.id).map((f, i) => (
+                          <span key={i} className={`text-[10px] w-4 h-4 flex items-center justify-center font-bold text-white rounded ${f.color}`}>
+                            {f.result}
+                          </span>
+                        ))}
+                      </div>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </div>
       ) : (
         <>
           {/* Rules Explainer */}
@@ -511,12 +630,13 @@ export default function Standings({ teams, matches, onToggleEliminated }: Standi
                     <th className="py-3 px-2 text-center w-20" title="Cartons jaunes et rouges">Cartons</th>
                     <th className="py-3 px-2 text-center w-14" title="Classement FIFA Mondial de référence">Rank FIFA</th>
                     <th className="py-3 px-3 text-right w-14 pl-1 font-bold text-emerald-400">Pts</th>
+                    <th className="py-3 px-2 text-center">État de forme</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-slate-800/20">
                   {filteredGlobalStandings.length === 0 ? (
                     <tr>
-                      <td colSpan={10} className="py-8 text-center text-slate-500 font-medium">
+                      <td colSpan={11} className="py-8 text-center text-slate-500 font-medium">
                         Aucun résultat pour la recherche "<strong>{searchTerm}</strong>"
                       </td>
                     </tr>
@@ -524,6 +644,7 @@ export default function Standings({ teams, matches, onToggleEliminated }: Standi
                     filteredGlobalStandings.map((team) => {
                       const trueRank = globalStandings.findIndex((t) => t.id === team.id) + 1;
                       const isQualifying = trueRank <= 32;
+                      const form = getTeamForm(team.id);
 
                       return (
                         <tr
@@ -622,6 +743,15 @@ export default function Standings({ teams, matches, onToggleEliminated }: Standi
                           {/* Points */}
                           <td className="py-2.5 px-3 text-right font-mono font-extrabold text-sm text-emerald-400">
                             {team.points}
+                          </td>
+                          <td className="py-2.5 px-2 text-center">
+                            <div className="flex justify-center gap-1">
+                              {form.map((f, i) => (
+                                <span key={i} className={`text-[10px] w-4 h-4 flex items-center justify-center font-bold text-white rounded ${f.color}`}>
+                                  {f.result}
+                                </span>
+                              ))}
+                            </div>
                           </td>
                         </tr>
                       );
