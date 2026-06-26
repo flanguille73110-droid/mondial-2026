@@ -6,6 +6,7 @@ import { Trophy, HelpCircle, ShieldAlert, Award, Search } from "lucide-react";
 interface StandingsProps {
   teams: Team[];
   matches: Match[];
+  onToggleEliminated: (teamId: string) => void;
 }
 
 interface TeamStats {
@@ -36,7 +37,7 @@ const FIFA_RANKINGS: Record<string, number> = {
   UZB: 64, CPV: 65, GHA: 68, JOR: 71, BIH: 74, HAI: 85, CUW: 86, NZL: 107
 };
 
-export default function Standings({ teams, matches }: StandingsProps) {
+export default function Standings({ teams, matches, onToggleEliminated }: StandingsProps) {
   const [selectedGroup, setSelectedGroup] = useState<string>("ALL");
   const [rankingMode, setRankingMode] = useState<"GROUP" | "GLOBAL">("GROUP");
   const [searchTerm, setSearchTerm] = useState<string>("");
@@ -632,15 +633,49 @@ export default function Standings({ teams, matches }: StandingsProps) {
 
             {/* Footer and Legend info */}
             <div className="mt-2 pt-3 border-t border-slate-800/50 flex flex-wrap gap-4 items-center justify-between text-[11px] text-slate-500">
-              <div className="flex flex-wrap gap-3">
-                <span className="flex items-center gap-1.5 font-semibold text-emerald-400">
-                  <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span>
-                  Rangs 1 à 32 : Qualifiés Virtuels
-                </span>
-                <span className="flex items-center gap-1.5 text-slate-500">
-                  <span className="w-1.5 h-1.5 rounded-full bg-slate-700"></span>
-                  Rangs 33 à 48 : Éliminés
-                </span>
+              <div className="flex flex-col gap-2">
+                <div className="flex flex-wrap gap-3">
+                  <span className="flex items-center gap-1.5 font-semibold text-emerald-400">
+                    <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span>
+                    Rangs 1 à 32 : Qualifiés Virtuels
+                  </span>
+                  <span className="flex items-center gap-1.5 text-slate-500">
+                    <span className="w-1.5 h-1.5 rounded-full bg-slate-700"></span>
+                    Rangs 33 à 48 : Éliminés
+                  </span>
+                </div>
+                
+                {/* Bouton élimination */}
+                <button
+                  onClick={() => {
+                    const allMatchesPlayed = matches.filter(m => m.stage === Stage.GROUPS).every(m => m.scoreA !== null && m.scoreB !== null);
+                    if (!allMatchesPlayed) {
+                      alert("Toutes les rencontres de groupes ne sont pas encore remplies.");
+                      return;
+                    }
+
+                    // Logique pour trouver les 4èmes de chaque groupe
+                    // Utiliser groupStandings déjà calculé
+                    const teamsToEliminate = new Set<string>();
+                    groupsList.forEach(grp => {
+                      const teamsInGroup = groupStandings[grp];
+                      if (teamsInGroup && teamsInGroup.length >= 4) {
+                        teamsToEliminate.add(teamsInGroup[3].id); // 4ème position (index 3)
+                      }
+                    });
+
+                    // Appeler la fonction pour éliminer ces équipes
+                    teamsToEliminate.forEach(teamId => {
+                      const team = teams.find(t => t.id === teamId);
+                      if (team && !team.eliminated) {
+                        onToggleEliminated(teamId);
+                      }
+                    });
+                  }}
+                  className="bg-rose-600 hover:bg-rose-500 text-white font-bold text-[10px] px-3 py-1.5 rounded-lg transition-all"
+                >
+                  Éliminer les équipes 4èmes
+                </button>
               </div>
               <span className="font-mono text-[10px] text-slate-600">
                 Calculé selon les résultats officiels Mondial 2026

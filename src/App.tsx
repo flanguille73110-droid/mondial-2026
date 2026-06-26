@@ -161,6 +161,15 @@ export default function App() {
     localStorage.setItem("wc2026_matches", JSON.stringify(updatedMatches));
   };
 
+  // Validate match
+  const handleValidateMatch = (matchId: string) => {
+    const updatedMatches = matches.map((m) =>
+      m.id === matchId ? { ...m, validated: true } : m
+    );
+    setMatches(updatedMatches);
+    localStorage.setItem("wc2026_matches", JSON.stringify(updatedMatches));
+  };
+
   // Toggle eliminated team state & save
   const handleToggleEliminated = (teamId: string) => {
     const updatedTeams = teams.map((team) =>
@@ -375,6 +384,7 @@ export default function App() {
                 onUpdateScore={handleUpdateScore}
                 onUpdateTeams={handleUpdateTeams}
                 onUpdateCards={handleUpdateCards}
+                onValidateMatch={handleValidateMatch}
               />
             ) : activeTab === "CALENDAR" ? (
               <div className="space-y-4">
@@ -403,7 +413,7 @@ export default function App() {
               </div>
             ) : activeTab === "STANDINGS" ? (
               /* Standings component with live rankings and rules */
-              <Standings teams={teams} matches={matches} />
+              <Standings teams={teams} matches={matches} onToggleEliminated={handleToggleEliminated} />
             ) : (
               /* Team grid check & select checkbox */
               <TeamManagement 

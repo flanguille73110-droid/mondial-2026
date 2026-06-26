@@ -9,6 +9,7 @@ interface HomeTabProps {
   onUpdateScore: (matchId: string, scoreA: number | null, scoreB: number | null) => void;
   onUpdateTeams: (matchId: string, teamAId: string | null, teamBId: string | null) => void;
   onUpdateCards: (matchId: string, type: "yellow" | "red", team: "A" | "B", val: number | null) => void;
+  onValidateMatch: (matchId: string) => void;
 }
 
 // Map months for parsing date strings from matches
@@ -51,6 +52,7 @@ export default function HomeTab({
   onUpdateScore,
   onUpdateTeams,
   onUpdateCards,
+  onValidateMatch,
 }: HomeTabProps) {
   // Heure réelle en France mise à jour en temps réel
   const [currentTime, setCurrentTime] = useState<Date>(() => new Date());
@@ -139,6 +141,10 @@ export default function HomeTab({
 
   // Finaliser la liste des matchs actifs à afficher
   const activeMatches: Match[] = displayMatches.map(d => d.match);
+
+  const finishedWithoutScore = sortedMatchesWithDate.filter(
+      ({ match, dateObj }) => dateObj.getTime() < nowMs && (match.scoreA === null || match.scoreB === null || !match.validated)
+  ).map(d => d.match);
 
   let statusText = "";
   let isLive = false;
@@ -257,6 +263,67 @@ export default function HomeTab({
       </div>
 
       {/* Main Focus Match Area */}
+      {finishedWithoutScore.length > 0 && (
+        <div className="space-y-4 mb-6">
+          <div className="flex items-center justify-between pl-1 mb-2">
+            <div className="flex items-center gap-2">
+              <span className="w-2 h-4 bg-rose-500 rounded"></span>
+              <h3 className="text-sm font-black text-slate-200 uppercase tracking-wider">
+                Rencontres terminées (Saisie requise)
+              </h3>
+            </div>
+          </div>
+          <div className="grid grid-cols-1 gap-4">
+            {finishedWithoutScore.map((match) => {
+              const matchTeamA = match.teamAId ? teamsMap.get(match.teamAId) : null;
+              const matchTeamB = match.teamBId ? teamsMap.get(match.teamBId) : null;
+
+              return (
+                <div key={match.id} className="bg-slate-900 border border-slate-800 rounded-2xl p-4 shadow-lg flex flex-col gap-4">
+                  <div className="flex justify-between items-center text-xs text-slate-400">
+                    <span>Match #{match.matchNumber} • {match.stage} {match.group ? `• Groupe ${match.group}` : ""}</span>
+                    <span>{match.date} • {match.time}</span>
+                  </div>
+                  <div className="flex justify-between items-center">
+                    <div className="flex items-center gap-2">
+                      <Flag emoji={matchTeamA?.flag || ""} name={matchTeamA?.name || ""} className="w-6 h-6" />
+                      <span className="font-bold text-slate-200">{matchTeamA?.name || "?"}</span>
+                    </div>
+                    <div className="flex items-center gap-2">
+                        <input type="number" min="0" className="w-12 bg-slate-950 border border-slate-800 rounded font-bold text-center py-1" value={match.scoreA ?? ""} onChange={(e) => onUpdateScore(match.id, parseInt(e.target.value) || null, match.scoreB)} />
+                        <span className="text-slate-600">:</span>
+                        <input type="number" min="0" className="w-12 bg-slate-950 border border-slate-800 rounded font-bold text-center py-1" value={match.scoreB ?? ""} onChange={(e) => onUpdateScore(match.id, match.scoreA, parseInt(e.target.value) || null)} />
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <span className="font-bold text-slate-200">{matchTeamB?.name || "?"}</span>
+                      <Flag emoji={matchTeamB?.flag || ""} name={matchTeamB?.name || ""} className="w-6 h-6" />
+                    </div>
+                  </div>
+                  <div className="flex justify-between items-center gap-4 text-[10px] text-slate-500 pt-2 border-t border-slate-800">
+                    <div className="flex gap-2">
+                      <span className="flex items-center gap-1">Cartons A:</span>
+                      <input type="number" min="0" className="w-10 bg-slate-950 border border-slate-800 rounded text-center" value={match.yellowCardsA ?? ""} onChange={(e) => onUpdateCards(match.id, "yellow", "A", parseInt(e.target.value) || null)} placeholder="J" title="Jaunes" />
+                      <input type="number" min="0" className="w-10 bg-slate-950 border border-slate-800 rounded text-center" value={match.redCardsA ?? ""} onChange={(e) => onUpdateCards(match.id, "red", "A", parseInt(e.target.value) || null)} placeholder="R" title="Rouges" />
+                    </div>
+                    <div className="flex gap-2">
+                      <span className="flex items-center gap-1">Cartons B:</span>
+                      <input type="number" min="0" className="w-10 bg-slate-950 border border-slate-800 rounded text-center" value={match.yellowCardsB ?? ""} onChange={(e) => onUpdateCards(match.id, "yellow", "B", parseInt(e.target.value) || null)} placeholder="J" title="Jaunes" />
+                      <input type="number" min="0" className="w-10 bg-slate-950 border border-slate-800 rounded text-center" value={match.redCardsB ?? ""} onChange={(e) => onUpdateCards(match.id, "red", "B", parseInt(e.target.value) || null)} placeholder="R" title="Rouges" />
+                    </div>
+                  </div>
+                  <button
+                    onClick={() => onValidateMatch(match.id)}
+                    className="w-full bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs py-2 rounded-lg transition-all"
+                  >
+                    Envoyer au calendrier
+                  </button>
+                </div>
+              );
+            })}
+          </div>
+        </div>
+      )}
+      
       {activeMatches.length > 0 ? (
         <div className="space-y-4">
           <div className="flex items-center justify-between pl-1 mb-2">

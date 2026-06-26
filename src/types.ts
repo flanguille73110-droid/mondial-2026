@@ -28,6 +28,7 @@ export interface Match {
   teamBNamePlaceholder?: string; // e.g. "2ème Groupe B"
   scoreA: number | null; // null means match not played
   scoreB: number | null;
+  validated?: boolean;
   yellowCardsA?: number | null;
   redCardsA?: number | null;
   yellowCardsB?: number | null;

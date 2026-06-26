@@ -131,6 +131,19 @@ export default function MatchList({
       )}
 
       {/* Main listing */}
+      {selectedStage === Stage.ROUND_32 && (
+        <div className="flex justify-center mb-4">
+          <button
+            onClick={() => {
+              // TODO: Implémenter la logique d'importation des équipes
+              alert("Fonctionnalité d'importation des équipes à venir");
+            }}
+            className="bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs px-4 py-2 rounded-lg shadow transition-all cursor-pointer"
+          >
+            Importer les équipes
+          </button>
+        </div>
+      )}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         {stageMatches.map((match) => {
           const teamA = match.teamAId ? teamsMap.get(match.teamAId) : null;
