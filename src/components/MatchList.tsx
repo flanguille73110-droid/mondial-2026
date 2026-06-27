@@ -2,6 +2,7 @@ import React, { useState, useMemo, useEffect } from "react";
 import { Match, Team, Stage } from "../types";
 import { Plus, Minus, Tv, Calendar, Trash2, HelpCircle } from "lucide-react";
 import Flag from "./Flag";
+import TournamentBracket from "./TournamentBracket";
 
 interface MatchListProps {
   teams: Team[];
@@ -166,7 +167,10 @@ export default function MatchList({
           )}
         </div>
       )}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+      {selectedStage === Stage.TABLEAU ? (
+        <TournamentBracket matches={matches} teams={teams} />
+      ) : (
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         {stageMatches.map((match) => {
           const teamA = match.teamAId ? teamsMap.get(match.teamAId) : null;
           const teamB = match.teamBId ? teamsMap.get(match.teamBId) : null;
@@ -450,6 +454,7 @@ export default function MatchList({
           );
         })}
       </div>
+      )}
     </div>
   );
 }

@@ -496,6 +496,7 @@ export default function App() {
                     { stage: Stage.QUARTERS, text: "Quarts" },
                     { stage: Stage.SEMIS, text: "Demis" },
                     { stage: Stage.FINAL, text: "Finales" },
+                    { stage: Stage.TABLEAU, text: "Tableau" },
                   ].map((item) => (
                     <button
                       key={item.stage}

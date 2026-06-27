@@ -5,7 +5,8 @@ export enum Stage {
   QUARTERS = "Quarts de Finale",
   SEMIS = "Demi-Finales",
   THIRD_PLACE = "Match 3ème Place",
-  FINAL = "Finale"
+  FINAL = "Finale",
+  TABLEAU = "Tableau"
 }
 
 export interface Team {
