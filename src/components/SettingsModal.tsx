@@ -1,5 +1,5 @@
 import React, { useState, useRef } from "react";
-import { Team, Match } from "../types";
+import { Team, Match, Stage } from "../types";
 import { X, Download, Upload, Info, CheckCircle2, AlertCircle, Settings } from "lucide-react";
 import * as XLSX from "xlsx";
 
@@ -116,6 +116,116 @@ export default function SettingsModal({
         text: "Une erreur est survenue lors de l'exportation du fichier Excel.",
       });
     }
+  };
+
+  // Export group stage matches to Excel
+  const handleExportGroups = () => {
+    try {
+      const groupMatches = matches.filter(m => m.stage === Stage.GROUPS);
+      const data = groupMatches.map((match) => {
+        const teamAObj = teams.find((t) => t.id === match.teamAId);
+        const teamBObj = teams.find((t) => t.id === match.teamBId);
+        return {
+          "ID Match": match.id,
+          "N° Match": match.matchNumber || "",
+          "Groupe": match.group || "",
+          "Nom Équipe A": teamAObj ? teamAObj.name : "",
+          "Score A": match.scoreA !== null ? match.scoreA : "",
+          "Cartons Jaunes A": match.yellowCardsA !== null ? match.yellowCardsA : "",
+          "Cartons Rouges A": match.redCardsA !== null ? match.redCardsA : "",
+          "Nom Équipe B": teamBObj ? teamBObj.name : "",
+          "Score B": match.scoreB !== null ? match.scoreB : "",
+          "Cartons Jaunes B": match.yellowCardsB !== null ? match.yellowCardsB : "",
+          "Cartons Rouges B": match.redCardsB !== null ? match.redCardsB : "",
+          "Date": match.date,
+          "Heure": match.time,
+        };
+      });
+      const ws = XLSX.utils.json_to_sheet(data);
+      const wb = XLSX.utils.book_new();
+      XLSX.utils.book_append_sheet(wb, ws, "PhaseGroupes");
+      XLSX.writeFile(wb, "mondial_2026_groupes.xlsx");
+      
+      setStatusMessage({
+        type: "success",
+        text: "Données des groupes exportées avec succès dans le fichier 'mondial_2026_groupes.xlsx'.",
+      });
+    } catch (e: any) {
+      console.error(e);
+      setStatusMessage({
+        type: "error",
+        text: "Une erreur est survenue lors de l'exportation.",
+      });
+    }
+  };
+
+  // Import group stage matches from Excel
+  const handleImportGroups = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setStatusMessage(null);
+    const files = e.target.files;
+    if (!files || files.length === 0) return;
+
+    const file = files[0];
+    const reader = new FileReader();
+
+    reader.onload = (event) => {
+      try {
+        const data = new Uint8Array(event.target?.result as ArrayBuffer);
+        const workbook = XLSX.read(data, { type: "array" });
+        const ws = workbook.Sheets["PhaseGroupes"];
+        
+        if (!ws) {
+          throw new Error("Onglet 'PhaseGroupes' non trouvé dans le fichier.");
+        }
+
+        const matchesJson: any[] = XLSX.utils.sheet_to_json(ws);
+        let updatedMatchesList = [...matches];
+        let importedMatchesCount = 0;
+
+        matchesJson.forEach((row) => {
+          const matchId = row["ID Match"];
+          if (matchId) {
+            const matchIndex = updatedMatchesList.findIndex((m) => m.id === matchId);
+            if (matchIndex !== -1 && updatedMatchesList[matchIndex].stage === Stage.GROUPS) {
+              const parseNum = (val: any) => {
+                if (val === undefined || val === "" || val === null) return null;
+                const n = Number(val);
+                return isNaN(n) ? null : n;
+              };
+
+              updatedMatchesList[matchIndex] = {
+                ...updatedMatchesList[matchIndex],
+                scoreA: parseNum(row["Score A"]),
+                scoreB: parseNum(row["Score B"]),
+                yellowCardsA: parseNum(row["Cartons Jaunes A"]),
+                redCardsA: parseNum(row["Cartons Rouges A"]),
+                yellowCardsB: parseNum(row["Cartons Jaunes B"]),
+                redCardsB: parseNum(row["Cartons Rouges B"]),
+              };
+              importedMatchesCount++;
+            }
+          }
+        });
+
+        onUpdateData(teams, updatedMatchesList);
+        
+        setStatusMessage({
+          type: "success",
+          text: `Importation réussie : ${importedMatchesCount} matchs de groupe mis à jour.`,
+        });
+
+        if (fileInputRef.current) {
+          fileInputRef.current.value = "";
+        }
+      } catch (err: any) {
+        console.error(err);
+        setStatusMessage({
+          type: "error",
+          text: "Erreur lors de l'importation des groupes : " + err.message,
+        });
+      }
+    };
+    reader.readAsArrayBuffer(file);
   };
 
   // Import from Excel file
@@ -282,7 +392,7 @@ export default function SettingsModal({
         </div>
 
         {/* Action Controls */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
           {/* Export Box */}
           <div className="bg-slate-950/45 p-4 rounded-xl border border-slate-800/60 flex flex-col justify-between space-y-4">
             <div>
@@ -301,6 +411,38 @@ export default function SettingsModal({
               <Download className="w-4 h-4" />
               Télécharger le fichier Excel
             </button>
+          </div>
+
+          {/* Export / Import Group Box */}
+          <div className="bg-slate-950/45 p-4 rounded-xl border border-slate-800/60 flex flex-col justify-between space-y-4">
+            <div>
+              <h3 className="text-sm font-semibold text-slate-200 flex items-center gap-2 mb-1.5">
+                <Settings className="w-4 h-4 text-emerald-400" />
+                Groupes (Excel)
+              </h3>
+              <p className="text-xs text-slate-400 leading-relaxed">
+                Gérer les scores et cartons des phases de groupes via Excel.
+              </p>
+            </div>
+            <div className="space-y-2">
+              <button
+                onClick={handleExportGroups}
+                className="w-full flex items-center justify-center gap-2 px-4 py-2.5 text-xs font-bold bg-slate-800 hover:bg-slate-700 active:bg-slate-900 text-slate-200 rounded-lg transition-colors border border-slate-700 hover:border-slate-600 shadow-sm cursor-pointer"
+              >
+                <Download className="w-4 h-4" />
+                Exporter
+              </button>
+              <label className="w-full flex items-center justify-center gap-2 px-4 py-2.5 text-xs font-bold bg-emerald-600 hover:bg-emerald-500 active:bg-emerald-700 text-white rounded-lg transition-colors shadow-sm cursor-pointer border border-emerald-500">
+                <Upload className="w-4 h-4" />
+                Importer
+                <input
+                  type="file"
+                  accept=".xlsx,.xls"
+                  onChange={handleImportGroups}
+                  className="hidden"
+                />
+              </label>
+            </div>
           </div>
 
           {/* Import Box */}

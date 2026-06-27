@@ -11,6 +11,7 @@ interface MatchListProps {
   onUpdateTeams: (matchId: string, teamAId: string | null, teamBId: string | null) => void;
   onUpdateCards: (matchId: string, type: "yellow" | "red", team: "A" | "B", val: number | null) => void;
   onImportTeams: (stage: Stage) => void;
+  importSuccess?: boolean;
 }
 
 export default function MatchList({
@@ -21,6 +22,7 @@ export default function MatchList({
   onUpdateTeams,
   onUpdateCards,
   onImportTeams,
+  importSuccess,
 }: MatchListProps) {
   const [selectedGroupFilter, setSelectedGroupFilter] = useState<string>("Tous");
 
@@ -36,9 +38,25 @@ export default function MatchList({
     return teams.filter((t) => !t.eliminated);
   }, [teams]);
 
+  // Teams already assigned to knockout stages
+  const placedTeamIds = useMemo(() => {
+    const ids = new Set<string>();
+    matches.filter(m => [Stage.ROUND_32, Stage.ROUND_16, Stage.QUARTERS, Stage.SEMIS, Stage.FINAL].includes(m.stage))
+           .forEach(m => {
+             if (m.teamAId) ids.add(m.teamAId);
+             if (m.teamBId) ids.add(m.teamBId);
+           });
+    return ids;
+  }, [matches]);
+
   // Filter matches belonging to the selected stage
   const stageMatches = useMemo(() => {
-    let filtered = matches.filter((m) => m.stage === selectedStage);
+    let filtered = matches.filter((m) => {
+      if (selectedStage === Stage.FINAL) {
+        return m.stage === Stage.FINAL || m.stage === Stage.THIRD_PLACE;
+      }
+      return m.stage === selectedStage;
+    });
     if (selectedStage === Stage.GROUPS && selectedGroupFilter !== "Tous") {
       filtered = filtered.filter((m) => m.group === selectedGroupFilter);
     }
@@ -134,13 +152,18 @@ export default function MatchList({
 
       {/* Main listing */}
       {[Stage.ROUND_32, Stage.ROUND_16, Stage.QUARTERS, Stage.SEMIS, Stage.FINAL].includes(selectedStage) && (
-        <div className="flex justify-center mb-4">
+        <div className="flex flex-col items-center mb-4 gap-2">
           <button
             onClick={() => onImportTeams(selectedStage)}
             className="bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs px-4 py-2 rounded-lg shadow transition-all cursor-pointer"
           >
             Importer les équipes
           </button>
+          {importSuccess && (
+            <div className="text-[10px] bg-emerald-950/80 text-emerald-300 px-3 py-1.5 rounded-md border border-emerald-800 animate-fade-in shadow-sm">
+              ✅ Importation réussie !
+            </div>
+          )}
         </div>
       )}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -203,17 +226,26 @@ export default function MatchList({
                       }`}
                     >
                       <option value="">{match.teamANamePlaceholder || "-- Choisir --"}</option>
-                      {/* Grouped by Group for visual ease */}
+                      {/* Grouped by Group, available first, then placed */}
                       {["A", "B", "C", "D", "E", "F", "G", "H", "I", "J", "K", "L"].map((grpLetter) => {
-                        const grpTeams = teams.filter(
-                          (t) => t.group === grpLetter && (!t.eliminated || t.id === match.teamAId)
-                        );
+                        const grpTeams = teams.filter((t) => t.group === grpLetter);
                         if (grpTeams.length === 0) return null;
+                        
+                        const isGroupStage = selectedStage === Stage.GROUPS;
+                        const available = grpTeams.filter(t => (isGroupStage || !t.eliminated) && (!placedTeamIds.has(t.id) || t.id === match.teamAId));
+                        const placed = grpTeams.filter(t => !isGroupStage && placedTeamIds.has(t.id) && t.id !== match.teamAId);
+                        
                         return (
                           <optgroup key={grpLetter} label={`Groupe ${grpLetter}`} translate="no" className="notranslate">
-                            {grpTeams.map((t) => (
+                            {available.map((t) => (
                               <option key={t.id} value={t.id} translate="no" className="notranslate">
-                                {t.flag} {t.name} {t.eliminated ? " (Éliminé)" : ""}
+                                {t.flag} {t.name} {t.eliminated ? "(Éliminé)" : ""}
+                              </option>
+                            ))}
+                            {placed.length > 0 && <option disabled>--- Déjà placés ---</option>}
+                            {placed.map((t) => (
+                              <option key={t.id} value={t.id} translate="no" className="notranslate">
+                                {t.flag} {t.name} (Placée)
                               </option>
                             ))}
                           </optgroup>
@@ -350,17 +382,26 @@ export default function MatchList({
                       }`}
                     >
                       <option value="">{match.teamBNamePlaceholder || "-- Choisir --"}</option>
-                      {/* Grouped by Group for visual ease */}
+                      {/* Grouped by Group, available first, then placed */}
                       {["A", "B", "C", "D", "E", "F", "G", "H", "I", "J", "K", "L"].map((grpLetter) => {
-                        const grpTeams = teams.filter(
-                          (t) => t.group === grpLetter && (!t.eliminated || t.id === match.teamBId)
-                        );
+                        const grpTeams = teams.filter((t) => t.group === grpLetter);
                         if (grpTeams.length === 0) return null;
+                        
+                        const isGroupStage = selectedStage === Stage.GROUPS;
+                        const available = grpTeams.filter(t => (isGroupStage || !t.eliminated) && (!placedTeamIds.has(t.id) || t.id === match.teamBId));
+                        const placed = grpTeams.filter(t => !isGroupStage && placedTeamIds.has(t.id) && t.id !== match.teamBId);
+                        
                         return (
                           <optgroup key={grpLetter} label={`Groupe ${grpLetter}`} translate="no" className="notranslate">
-                            {grpTeams.map((t) => (
+                            {available.map((t) => (
                               <option key={t.id} value={t.id} translate="no" className="notranslate">
-                                {t.flag} {t.name} {t.eliminated ? " (Éliminé)" : ""}
+                                {t.flag} {t.name} {t.eliminated ? "(Éliminé)" : ""}
+                              </option>
+                            ))}
+                            {placed.length > 0 && <option disabled>--- Déjà placés ---</option>}
+                            {placed.map((t) => (
+                              <option key={t.id} value={t.id} translate="no" className="notranslate">
+                                {t.flag} {t.name} (Placée)
                               </option>
                             ))}
                           </optgroup>

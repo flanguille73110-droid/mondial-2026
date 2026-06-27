@@ -214,22 +214,22 @@ export function generateInitialMatches(): Match[] {
   // --- KNOCKOUT PATHS SETUP ---
   // 1. ROUND of 32 (16e de finale) - 16 matches (M73 to M88)
   const r32Placeholders = [
-    { num: 73, labelA: "2ème Groupe A", labelB: "2ème Groupe B", date: "28 Juin 2026", time: "21:00", ch: "TF1" },
-    { num: 74, labelA: "1er Groupe E", labelB: "3ème Gr. A/B/C/D/F", date: "29 Juin 2026", time: "22:30", ch: "beIN Sports" },
-    { num: 75, labelA: "1er Groupe F", labelB: "2ème Groupe C", date: "30 Juin 2026", time: "03:00", ch: "M6" },
-    { num: 76, labelA: "1er Groupe C", labelB: "2ème Groupe F", date: "29 Juin 2026", time: "19:00", ch: "TF1" },
-    { num: 77, labelA: "1er Groupe I", labelB: "3ème Gr. C/D/F/G/H", date: "30 Juin 2026", time: "23:00", ch: "beIN Sports" },
-    { num: 78, labelA: "2ème Groupe E", labelB: "2ème Groupe I", date: "30 Juin 2026", time: "19:00", ch: "M6" },
-    { num: 79, labelA: "1er Groupe A", labelB: "3ème Gr. C/E/F/H/I", date: "1 Juillet 2026", time: "03:00", ch: "TF1" },
-    { num: 80, labelA: "1er Groupe L", labelB: "3ème Gr. E/H/I/J/K", date: "1 Juillet 2026", time: "22:00", ch: "beIN Sports" },
-    { num: 81, labelA: "1er Groupe D", labelB: "3ème Gr. B/E/F/I/J", date: "2 Juillet 2026", time: "02:00", ch: "beIN Sports" },
-    { num: 82, labelA: "1er Groupe G", labelB: "2ème Groupe H", date: "2 Juillet 2026", time: "18:00", ch: "M6" },
-    { num: 83, labelA: "2ème Groupe K", labelB: "2ème Groupe L", date: "3 Juillet 2026", time: "01:00", ch: "TF1" },
-    { num: 84, labelA: "1er Groupe H", labelB: "2ème Groupe J", date: "2 Juillet 2026", time: "21:00", ch: "beIN Sports" },
-    { num: 85, labelA: "1er Groupe B", labelB: "3ème Gr. E/F/G/I/J", date: "4 Juillet 2026", time: "21:00", ch: "TF1" },
-    { num: 86, labelA: "1er Groupe J", labelB: "2ème Groupe H", date: "4 Juillet 2026", time: "00:00", ch: "M6" },
-    { num: 87, labelA: "1er Groupe K", labelB: "3ème Gr. A/B/C/D/I", date: "3 Juillet 2026", time: "18:00", ch: "beIN Sports" },
-    { num: 88, labelA: "2ème Groupe D", labelB: "2ème Groupe G", date: "3 Juillet 2026", time: "20:00", ch: "M6" },
+    { num: 73, labelA: "2ème Groupe A", labelB: "2ème Groupe B", date: "28 Juin 2026", time: "15:00", ch: "beIN Sports" },
+    { num: 74, labelA: "1er Groupe E", labelB: "3ème Gr. A/B/C/D/F", date: "29 Juin 2026", time: "16:30", ch: "beIN Sports" },
+    { num: 75, labelA: "1er Groupe F", labelB: "2ème Groupe C", date: "29 Juin 2026", time: "21:00", ch: "beIN Sports" },
+    { num: 76, labelA: "1er Groupe C", labelB: "2ème Groupe F", date: "30 Juin 2026", time: "13:00", ch: "beIN Sports" },
+    { num: 77, labelA: "1er Groupe I", labelB: "3ème Gr. C/D/F/G/H", date: "30 Juin 2026", time: "17:00", ch: "beIN Sports" },
+    { num: 78, labelA: "2ème Groupe E", labelB: "2ème Groupe I", date: "30 Juin 2026", time: "12:00", ch: "beIN Sports" },
+    { num: 79, labelA: "1er Groupe A", labelB: "3ème Gr. C/E/F/H/I", date: "30 Juin 2026", time: "21:00", ch: "beIN Sports" },
+    { num: 80, labelA: "1er Groupe L", labelB: "3ème Gr. E/H/I/J/K", date: "1 Juillet 2026", time: "12:00", ch: "beIN Sports" },
+    { num: 81, labelA: "1er Groupe D", labelB: "3ème Gr. B/E/F/I/J", date: "1 Juillet 2026", time: "20:00", ch: "beIN Sports" },
+    { num: 82, labelA: "1er Groupe G", labelB: "3ème Gr. A/E/H/I/J", date: "1 Juillet 2026", time: "16:00", ch: "beIN Sports" },
+    { num: 83, labelA: "2ème Groupe K", labelB: "2ème Groupe L", date: "2 Juillet 2026", time: "19:00", ch: "beIN Sports" },
+    { num: 84, labelA: "1er Groupe H", labelB: "2ème Groupe J", date: "2 Juillet 2026", time: "15:00", ch: "beIN Sports" },
+    { num: 85, labelA: "1er Groupe B", labelB: "3ème Gr. E/F/G/H/I", date: "2 Juillet 2026", time: "23:00", ch: "beIN Sports" },
+    { num: 86, labelA: "1er Groupe J", labelB: "2ème Groupe H", date: "3 Juillet 2026", time: "10:00", ch: "beIN Sports" },
+    { num: 87, labelA: "1er Groupe K", labelB: "3ème Gr. D/E/I/J/L", date: "3 Juillet 2026", time: "21:30", ch: "beIN Sports" },
+    { num: 88, labelA: "2ème Groupe D", labelB: "2ème Groupe G", date: "3 Juillet 2026", time: "14:00", ch: "beIN Sports" },
   ];
 
   r32Placeholders.forEach((p, idx) => {
@@ -338,8 +338,8 @@ export function generateInitialMatches(): Match[] {
     scoreA: null,
     scoreB: null,
     date: "18 Juillet 2026",
-    time: "23:00",
-    channel: "M6",
+    time: "17:00",
+    channel: "TF1",
   });
 
   // 6. FINAL - 1 match (M104)

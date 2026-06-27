@@ -161,6 +161,7 @@ export default function App() {
     localStorage.setItem("wc2026_matches", JSON.stringify(updatedMatches));
   };
 
+  const [importSuccess, setImportSuccess] = useState(false);
   const handleImportTeams = (stage: Stage) => {
     if (stage === Stage.ROUND_32) {
       // Calculer les classements des groupes
@@ -251,6 +252,8 @@ export default function App() {
       
       setMatches(updatedMatches);
       localStorage.setItem("wc2026_matches", JSON.stringify(updatedMatches));
+      setImportSuccess(true);
+      setTimeout(() => setImportSuccess(false), 3000);
       return;
     }
 
@@ -293,6 +296,8 @@ export default function App() {
 
     setMatches(currentMatches);
     localStorage.setItem("wc2026_matches", JSON.stringify(currentMatches));
+    setImportSuccess(true);
+    setTimeout(() => setImportSuccess(false), 3000);
   };
 
   // Validate match
@@ -544,6 +549,7 @@ export default function App() {
                   onUpdateTeams={handleUpdateTeams}
                   onUpdateCards={handleUpdateCards}
                   onImportTeams={handleImportTeams}
+                  importSuccess={importSuccess}
                 />
               </div>
             ) : activeTab === "STANDINGS" ? (

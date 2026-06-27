@@ -143,7 +143,7 @@ export default function HomeTab({
   const activeMatches: Match[] = displayMatches.map(d => d.match);
 
   const finishedWithoutScore = sortedMatchesWithDate.filter(
-      ({ match, dateObj }) => dateObj.getTime() < nowMs && (match.scoreA === null || match.scoreB === null || !match.validated)
+      ({ match, dateObj }) => (dateObj.getTime() + cutoff5HoursMs) <= nowMs && (match.scoreA === null || match.scoreB === null || !match.validated)
   ).map(d => d.match);
 
   let statusText = "";
@@ -290,9 +290,15 @@ export default function HomeTab({
                       <span className="font-bold text-slate-200">{matchTeamA?.name || "?"}</span>
                     </div>
                     <div className="flex items-center gap-2">
-                        <input type="number" min="0" className="w-12 bg-slate-950 border border-slate-800 rounded font-bold text-center py-1" value={match.scoreA ?? ""} onChange={(e) => onUpdateScore(match.id, parseInt(e.target.value) || null, match.scoreB)} />
+                        <input type="number" min="0" className="w-12 bg-slate-950 border border-slate-800 rounded font-bold text-center py-1" value={match.scoreA ?? ""} onChange={(e) => {
+                          const val = e.target.value;
+                          onUpdateScore(match.id, val === "" ? null : parseInt(val, 10), match.scoreB);
+                        }} />
                         <span className="text-slate-600">:</span>
-                        <input type="number" min="0" className="w-12 bg-slate-950 border border-slate-800 rounded font-bold text-center py-1" value={match.scoreB ?? ""} onChange={(e) => onUpdateScore(match.id, match.scoreA, parseInt(e.target.value) || null)} />
+                        <input type="number" min="0" className="w-12 bg-slate-950 border border-slate-800 rounded font-bold text-center py-1" value={match.scoreB ?? ""} onChange={(e) => {
+                          const val = e.target.value;
+                          onUpdateScore(match.id, match.scoreA, val === "" ? null : parseInt(val, 10));
+                        }} />
                     </div>
                     <div className="flex items-center gap-2">
                       <span className="font-bold text-slate-200">{matchTeamB?.name || "?"}</span>
