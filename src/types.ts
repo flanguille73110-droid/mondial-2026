@@ -34,6 +34,10 @@ export interface Match {
   redCardsA?: number | null;
   yellowCardsB?: number | null;
   redCardsB?: number | null;
+  hasExtraTime?: boolean;
+  hasPenalties?: boolean;
+  penaltyScoreA?: number | null;
+  penaltyScoreB?: number | null;
   date: string; // ISO date string or formatted date
   time: string; // e.g. "21:00" (heure française)
   channel: string; // e.g. "TF1", "M6", "beIN Sports"

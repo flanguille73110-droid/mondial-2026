@@ -161,6 +161,21 @@ export default function App() {
     localStorage.setItem("wc2026_matches", JSON.stringify(updatedMatches));
   };
 
+  // Update knockout match specific details like extra time, penalties and penalty scores
+  const handleUpdateKnockoutDetails = (
+    matchId: string,
+    hasExtraTime: boolean,
+    hasPenalties: boolean,
+    penaltyScoreA: number | null,
+    penaltyScoreB: number | null
+  ) => {
+    const updatedMatches = matches.map((m) =>
+      m.id === matchId ? { ...m, hasExtraTime, hasPenalties, penaltyScoreA, penaltyScoreB } : m
+    );
+    setMatches(updatedMatches);
+    localStorage.setItem("wc2026_matches", JSON.stringify(updatedMatches));
+  };
+
   const [importSuccess, setImportSuccess] = useState(false);
   const handleImportTeams = (stage: Stage) => {
     if (stage === Stage.ROUND_32) {
@@ -277,17 +292,30 @@ export default function App() {
       let teamAId = match.teamAId;
       let teamBId = match.teamBId;
 
+      const getMatchWinner = (m: Match) => {
+        if (m.scoreA === null || m.scoreB === null) return null;
+        if (m.scoreA > m.scoreB) return m.teamAId;
+        if (m.scoreB > m.scoreA) return m.teamBId;
+        if (m.hasPenalties && m.penaltyScoreA !== null && m.penaltyScoreB !== null) {
+          if (m.penaltyScoreA > m.penaltyScoreB) return m.teamAId;
+          if (m.penaltyScoreB > m.penaltyScoreA) return m.teamBId;
+        }
+        return null;
+      };
+
       if (matchNumberA && !teamAId) {
         const prevMatch = previousMatches.find(m => m.matchNumber === matchNumberA);
-        if (prevMatch && prevMatch.scoreA !== null && prevMatch.scoreB !== null) {
-          teamAId = prevMatch.scoreA > prevMatch.scoreB ? prevMatch.teamAId : prevMatch.teamBId;
+        if (prevMatch) {
+          const winnerId = getMatchWinner(prevMatch);
+          if (winnerId) teamAId = winnerId;
         }
       }
 
       if (matchNumberB && !teamBId) {
         const prevMatch = previousMatches.find(m => m.matchNumber === matchNumberB);
-        if (prevMatch && prevMatch.scoreA !== null && prevMatch.scoreB !== null) {
-          teamBId = prevMatch.scoreA > prevMatch.scoreB ? prevMatch.teamAId : prevMatch.teamBId;
+        if (prevMatch) {
+          const winnerId = getMatchWinner(prevMatch);
+          if (winnerId) teamBId = winnerId;
         }
       }
 
@@ -525,6 +553,7 @@ export default function App() {
                 onUpdateTeams={handleUpdateTeams}
                 onUpdateCards={handleUpdateCards}
                 onValidateMatch={handleValidateMatch}
+                onUpdateKnockoutDetails={handleUpdateKnockoutDetails}
               />
             ) : activeTab === "CALENDAR" ? (
               <div className="space-y-4">
@@ -549,6 +578,7 @@ export default function App() {
                   onUpdateScore={handleUpdateScore}
                   onUpdateTeams={handleUpdateTeams}
                   onUpdateCards={handleUpdateCards}
+                  onUpdateKnockoutDetails={handleUpdateKnockoutDetails}
                   onImportTeams={handleImportTeams}
                   importSuccess={importSuccess}
                 />

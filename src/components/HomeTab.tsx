@@ -10,6 +10,7 @@ interface HomeTabProps {
   onUpdateTeams: (matchId: string, teamAId: string | null, teamBId: string | null) => void;
   onUpdateCards: (matchId: string, type: "yellow" | "red", team: "A" | "B", val: number | null) => void;
   onValidateMatch: (matchId: string) => void;
+  onUpdateKnockoutDetails?: (matchId: string, hasExtraTime: boolean, hasPenalties: boolean, penaltyScoreA: number | null, penaltyScoreB: number | null) => void;
 }
 
 // Map months for parsing date strings from matches
@@ -53,6 +54,7 @@ export default function HomeTab({
   onUpdateTeams,
   onUpdateCards,
   onValidateMatch,
+  onUpdateKnockoutDetails,
 }: HomeTabProps) {
   // Heure réelle en France mise à jour en temps réel
   const [currentTime, setCurrentTime] = useState<Date>(() => new Date());
@@ -317,6 +319,112 @@ export default function HomeTab({
                       <input type="number" min="0" className="w-10 bg-slate-950 border border-slate-800 rounded text-center" value={match.redCardsB ?? ""} onChange={(e) => onUpdateCards(match.id, "red", "B", parseInt(e.target.value) || null)} placeholder="R" title="Rouges" />
                     </div>
                   </div>
+
+                  {/* Prolongation et Tirs au but (matchs #73 à #104) */}
+                  {match.matchNumber && match.matchNumber >= 73 && match.matchNumber <= 104 && (
+                    <div className="pt-2.5 border-t border-slate-800/40 flex flex-col gap-2">
+                      <div className="flex items-center justify-center gap-6">
+                        <label className="flex items-center gap-2 text-[10px] font-semibold text-slate-300 cursor-pointer select-none">
+                          <input
+                            type="checkbox"
+                            checked={!!match.hasExtraTime}
+                            onChange={(e) => {
+                              if (onUpdateKnockoutDetails) {
+                                onUpdateKnockoutDetails(
+                                  match.id,
+                                  e.target.checked,
+                                  !!match.hasPenalties,
+                                  match.penaltyScoreA ?? null,
+                                  match.penaltyScoreB ?? null
+                                );
+                              }
+                            }}
+                            className="rounded border-slate-800 bg-slate-950 text-emerald-500 focus:ring-emerald-500/30 w-3 h-3"
+                          />
+                          Prolongation
+                        </label>
+
+                        <label className="flex items-center gap-2 text-[10px] font-semibold text-slate-300 cursor-pointer select-none">
+                          <input
+                            type="checkbox"
+                            checked={!!match.hasPenalties}
+                            onChange={(e) => {
+                              const checked = e.target.checked;
+                              if (onUpdateKnockoutDetails) {
+                                onUpdateKnockoutDetails(
+                                  match.id,
+                                  !!match.hasExtraTime,
+                                  checked,
+                                  checked ? (match.penaltyScoreA ?? 0) : null,
+                                  checked ? (match.penaltyScoreB ?? 0) : null
+                                );
+                              }
+                            }}
+                            className="rounded border-slate-800 bg-slate-950 text-emerald-500 focus:ring-emerald-500/30 w-3 h-3"
+                          />
+                          Tirs au but
+                        </label>
+                      </div>
+
+                      {/* Penalty Scores inputs */}
+                      {!!match.hasPenalties && (
+                        <div className="flex items-center justify-between gap-2 px-3 py-1.5 bg-slate-950/40 rounded-xl border border-slate-800/40">
+                          <div className="flex items-center gap-2 flex-1 justify-end">
+                            <span className="text-[9px] font-bold text-slate-400 uppercase tracking-wider truncate max-w-[80px]">
+                              {matchTeamA ? matchTeamA.name : match.teamANamePlaceholder || "TBD"}
+                            </span>
+                            <input
+                              type="number"
+                              min="0"
+                              placeholder="0"
+                              value={match.penaltyScoreA ?? ""}
+                              onChange={(e) => {
+                                const val = e.target.value === "" ? null : Math.max(0, parseInt(e.target.value) || 0);
+                                if (onUpdateKnockoutDetails) {
+                                  onUpdateKnockoutDetails(
+                                    match.id,
+                                    !!match.hasExtraTime,
+                                    !!match.hasPenalties,
+                                    val,
+                                    match.penaltyScoreB ?? null
+                                  );
+                                }
+                              }}
+                              className="w-10 bg-slate-950 text-slate-100 border border-slate-800 rounded font-mono text-[10px] text-center py-0.5 focus:border-emerald-500 focus:outline-none"
+                            />
+                          </div>
+
+                          <div className="text-slate-500 text-[9px] font-extrabold px-1 shrink-0 uppercase tracking-wider">Tab</div>
+
+                          <div className="flex items-center gap-2 flex-1 justify-start">
+                            <input
+                              type="number"
+                              min="0"
+                              placeholder="0"
+                              value={match.penaltyScoreB ?? ""}
+                              onChange={(e) => {
+                                const val = e.target.value === "" ? null : Math.max(0, parseInt(e.target.value) || 0);
+                                if (onUpdateKnockoutDetails) {
+                                  onUpdateKnockoutDetails(
+                                    match.id,
+                                    !!match.hasExtraTime,
+                                    !!match.hasPenalties,
+                                    match.penaltyScoreA ?? null,
+                                    val
+                                  );
+                                }
+                              }}
+                              className="w-10 bg-slate-950 text-slate-100 border border-slate-800 rounded font-mono text-[10px] text-center py-0.5 focus:border-emerald-500 focus:outline-none"
+                            />
+                            <span className="text-[9px] font-bold text-slate-400 uppercase tracking-wider truncate max-w-[80px]">
+                              {matchTeamB ? matchTeamB.name : match.teamBNamePlaceholder || "TBD"}
+                            </span>
+                          </div>
+                        </div>
+                      )}
+                    </div>
+                  )}
+
                   <button
                     onClick={() => onValidateMatch(match.id)}
                     className="w-full bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs py-2 rounded-lg transition-all"
@@ -704,6 +812,111 @@ export default function HomeTab({
                         </div>
 
                       </div>
+
+                      {/* Prolongation et Tirs au but (matchs #73 à #104) */}
+                      {match.matchNumber && match.matchNumber >= 73 && match.matchNumber <= 104 && (
+                        <div className="mt-4 pt-4 border-t border-slate-800/60 flex flex-col gap-3">
+                          <div className="flex items-center justify-center gap-6">
+                            <label className="flex items-center gap-2 text-xs font-semibold text-slate-300 cursor-pointer select-none">
+                              <input
+                                type="checkbox"
+                                checked={!!match.hasExtraTime}
+                                onChange={(e) => {
+                                  if (onUpdateKnockoutDetails) {
+                                    onUpdateKnockoutDetails(
+                                      match.id,
+                                      e.target.checked,
+                                      !!match.hasPenalties,
+                                      match.penaltyScoreA ?? null,
+                                      match.penaltyScoreB ?? null
+                                    );
+                                  }
+                                }}
+                                className="rounded border-slate-800 bg-slate-950 text-emerald-500 focus:ring-emerald-500/30 w-3.5 h-3.5"
+                              />
+                              Prolongation
+                            </label>
+
+                            <label className="flex items-center gap-2 text-xs font-semibold text-slate-300 cursor-pointer select-none">
+                              <input
+                                type="checkbox"
+                                checked={!!match.hasPenalties}
+                                onChange={(e) => {
+                                  const checked = e.target.checked;
+                                  if (onUpdateKnockoutDetails) {
+                                    onUpdateKnockoutDetails(
+                                      match.id,
+                                      !!match.hasExtraTime,
+                                      checked,
+                                      checked ? (match.penaltyScoreA ?? 0) : null,
+                                      checked ? (match.penaltyScoreB ?? 0) : null
+                                    );
+                                  }
+                                }}
+                                className="rounded border-slate-800 bg-slate-950 text-emerald-500 focus:ring-emerald-500/30 w-3.5 h-3.5"
+                              />
+                              Tirs au but
+                            </label>
+                          </div>
+
+                          {/* Penalty Scores inputs */}
+                          {!!match.hasPenalties && (
+                            <div className="flex items-center justify-between gap-2 px-4 py-2 bg-slate-950/40 rounded-xl border border-slate-800/40 max-w-md mx-auto w-full animate-fade-in">
+                              <div className="flex items-center gap-2 flex-1 justify-end">
+                                <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider truncate max-w-[120px]">
+                                  {matchTeamA ? matchTeamA.name : match.teamANamePlaceholder || "TBD"}
+                                </span>
+                                <input
+                                  type="number"
+                                  min="0"
+                                  placeholder="0"
+                                  value={match.penaltyScoreA ?? ""}
+                                  onChange={(e) => {
+                                    const val = e.target.value === "" ? null : Math.max(0, parseInt(e.target.value) || 0);
+                                    if (onUpdateKnockoutDetails) {
+                                      onUpdateKnockoutDetails(
+                                        match.id,
+                                        !!match.hasExtraTime,
+                                        !!match.hasPenalties,
+                                        val,
+                                        match.penaltyScoreB ?? null
+                                      );
+                                    }
+                                  }}
+                                  className="w-10 bg-slate-950 text-slate-100 border border-slate-800 rounded font-mono text-xs text-center py-1 focus:border-emerald-500 focus:outline-none"
+                                />
+                              </div>
+
+                              <div className="text-slate-500 text-[10px] font-extrabold px-1 shrink-0 uppercase tracking-wider">Tab</div>
+
+                              <div className="flex items-center gap-2 flex-1 justify-start">
+                                <input
+                                  type="number"
+                                  min="0"
+                                  placeholder="0"
+                                  value={match.penaltyScoreB ?? ""}
+                                  onChange={(e) => {
+                                    const val = e.target.value === "" ? null : Math.max(0, parseInt(e.target.value) || 0);
+                                    if (onUpdateKnockoutDetails) {
+                                      onUpdateKnockoutDetails(
+                                        match.id,
+                                        !!match.hasExtraTime,
+                                        !!match.hasPenalties,
+                                        match.penaltyScoreA ?? null,
+                                        val
+                                      );
+                                    }
+                                  }}
+                                  className="w-10 bg-slate-950 text-slate-100 border border-slate-800 rounded font-mono text-xs text-center py-1 focus:border-emerald-500 focus:outline-none"
+                                />
+                                <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider truncate max-w-[120px]">
+                                  {matchTeamB ? matchTeamB.name : match.teamBNamePlaceholder || "TBD"}
+                                </span>
+                              </div>
+                            </div>
+                          )}
+                        </div>
+                      )}
                     </>
                   )}
 

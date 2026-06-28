@@ -348,6 +348,34 @@ export default function Standings({ teams, matches, onToggleEliminated }: Standi
             </div>
           </div>
 
+          {/* Action Button to Eliminate 4th Placed Teams */}
+          <div className="flex justify-end pt-1">
+            <button
+              onClick={() => {
+                const teamsToEliminate: string[] = [];
+                groupsList.forEach(grp => {
+                  const teamsInGroup = groupStandings[grp];
+                  if (teamsInGroup && teamsInGroup.length >= 4) {
+                    teamsToEliminate.push(teamsInGroup[3].id); // 4ème position (index 3)
+                  }
+                });
+
+                let count = 0;
+                teamsToEliminate.forEach(teamId => {
+                  const team = teams.find(t => t.id === teamId);
+                  if (team && !team.eliminated) {
+                    onToggleEliminated(teamId);
+                    count++;
+                  }
+                });
+              }}
+              className="w-full sm:w-auto flex items-center justify-center gap-2 px-5 py-2.5 text-xs font-extrabold bg-rose-650 hover:bg-rose-600 active:bg-rose-700 text-white rounded-xl shadow-md border border-rose-500/20 transition-all hover:scale-[1.01] cursor-pointer"
+            >
+              <ShieldAlert className="w-4 h-4 text-rose-200" />
+              Équipes a éliminées
+            </button>
+          </div>
+
           {/* Standings Grid */}
           <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-6">
             {displayedGroups.map((groupLetter) => {
@@ -505,9 +533,26 @@ export default function Standings({ teams, matches, onToggleEliminated }: Standi
         </>
       ) : rankingMode === "THIRD_PLACES" ? (
         <div className="bg-slate-900/60 border border-slate-800/80 rounded-xl p-4 sm:p-5 shadow-lg flex flex-col gap-4">
-          <h3 className="text-sm font-extrabold text-slate-100 border-b border-slate-800/80 pb-4">
-            CLASSEMENT DES 3ÈMES (Qualifiés si dans le Top 8)
-          </h3>
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-slate-800/80 pb-4">
+            <h3 className="text-sm font-extrabold text-slate-100">
+              CLASSEMENT DES 3ÈMES (Qualifiés si dans le Top 8)
+            </h3>
+            <button
+              onClick={() => {
+                const teamsToEliminate = thirdPlacesStandings.slice(8, 12);
+                teamsToEliminate.forEach(teamStats => {
+                  const originalTeam = teams.find(t => t.id === teamStats.id);
+                  if (originalTeam && !originalTeam.eliminated) {
+                    onToggleEliminated(originalTeam.id);
+                  }
+                });
+              }}
+              className="w-full sm:w-auto flex items-center justify-center gap-2 px-4 py-2 text-xs font-extrabold bg-rose-650 hover:bg-rose-600 active:bg-rose-700 text-white rounded-xl shadow-md border border-rose-500/20 transition-all hover:scale-[1.01] cursor-pointer"
+            >
+              <ShieldAlert className="w-4 h-4 text-rose-200" />
+              Éliminé de 9 à 12
+            </button>
+          </div>
           <div className="overflow-x-auto">
             <table className="w-full text-left text-xs font-sans whitespace-nowrap">
               <thead>

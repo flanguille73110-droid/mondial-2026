@@ -7,7 +7,7 @@ interface TournamentBracketProps {
   teams: Team[];
 }
 
-const BracketMatch = ({ match, teams }: { match: Match; teams: Team[] }) => {
+const BracketMatch = ({ match, teams }: { match: Match; teams: Team[]; key?: string }) => {
   const teamA = match.teamAId ? teams.find(t => t.id === match.teamAId) : null;
   const teamB = match.teamBId ? teams.find(t => t.id === match.teamBId) : null;
 
@@ -23,14 +23,24 @@ const BracketMatch = ({ match, teams }: { match: Match; teams: Team[] }) => {
             <Flag emoji={teamA?.flag || ""} name={teamA?.name || ""} className="w-4 h-3 shrink-0" />
             <span className="truncate">{teamA ? teamA.name : match.teamANamePlaceholder || "TBD"}</span>
           </div>
-          <span className="font-bold text-white shrink-0">{match.scoreA ?? "-"}</span>
+          <span className="font-bold text-white shrink-0">
+            {match.scoreA ?? "-"}
+            {match.hasPenalties && match.penaltyScoreA !== null && (
+              <span className="text-[9px] text-amber-400 ml-1">({match.penaltyScoreA})</span>
+            )}
+          </span>
         </div>
         <div className="flex items-center justify-between gap-1">
           <div className="flex items-center gap-1 overflow-hidden">
             <Flag emoji={teamB?.flag || ""} name={teamB?.name || ""} className="w-4 h-3 shrink-0" />
             <span className="truncate">{teamB ? teamB.name : match.teamBNamePlaceholder || "TBD"}</span>
           </div>
-          <span className="font-bold text-white shrink-0">{match.scoreB ?? "-"}</span>
+          <span className="font-bold text-white shrink-0">
+            {match.scoreB ?? "-"}
+            {match.hasPenalties && match.penaltyScoreB !== null && (
+              <span className="text-[9px] text-amber-400 ml-1">({match.penaltyScoreB})</span>
+            )}
+          </span>
         </div>
       </div>
     </div>
