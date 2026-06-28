@@ -248,9 +248,9 @@ export default function MatchList({
                                 {t.flag} {t.name} {t.eliminated ? "(Éliminé)" : ""}
                               </option>
                             ))}
-                            {placed.length > 0 && <option disabled>--- Déjà placés ---</option>}
+                            {placed.length > 0 && <option disabled style={{ color: '#475569' }}>--- Déjà placés ---</option>}
                             {placed.map((t) => (
-                              <option key={t.id} value={t.id} translate="no" className="notranslate">
+                              <option key={t.id} value={t.id} translate="no" className="notranslate text-slate-500 opacity-60 font-normal" style={{ color: '#64748b' }}>
                                 {t.flag} {t.name} (Placée)
                               </option>
                             ))}
@@ -404,9 +404,9 @@ export default function MatchList({
                                 {t.flag} {t.name} {t.eliminated ? "(Éliminé)" : ""}
                               </option>
                             ))}
-                            {placed.length > 0 && <option disabled>--- Déjà placés ---</option>}
+                            {placed.length > 0 && <option disabled style={{ color: '#475569' }}>--- Déjà placés ---</option>}
                             {placed.map((t) => (
-                              <option key={t.id} value={t.id} translate="no" className="notranslate">
+                              <option key={t.id} value={t.id} translate="no" className="notranslate text-slate-500 opacity-60 font-normal" style={{ color: '#64748b' }}>
                                 {t.flag} {t.name} (Placée)
                               </option>
                             ))}
