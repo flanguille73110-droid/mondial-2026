@@ -859,6 +859,14 @@ export default function Standings({ teams, matches, onToggleEliminated }: Standi
           </div>
         </>
       )}
+
+      {/* Information Banner on Card resets */}
+      <div className="bg-slate-900/40 border border-slate-800/80 p-3.5 rounded-xl flex items-start gap-3 mt-4">
+        <span className="text-amber-400 text-sm mt-0.5 shrink-0">⚠️</span>
+        <div className="text-xs text-slate-400 leading-relaxed">
+          <strong className="text-slate-200">Règles de Fair-Play & Cartons :</strong> À la fin de la phase de groupes, toute équipe sélectionnée en 16èmes de finale repart avec ses compteurs de cartons à zéro. De plus, à l'issue des quarts de finale, les cartons sont à nouveau remis à zéro pour les équipes demi-finalistes restantes afin d'éviter qu'un joueur ne soit suspendu pour la finale suite à un cumul de cartons.
+        </div>
+      </div>
     </div>
   );
 }

@@ -154,8 +154,16 @@ export default function MatchList({
       )}
 
       {/* Main listing */}
-      {[Stage.ROUND_32, Stage.ROUND_16, Stage.QUARTERS, Stage.SEMIS, Stage.FINAL].includes(selectedStage) && (
-        <div className="flex flex-col items-center mb-4 gap-2">
+      {[Stage.ROUND_32, Stage.ROUND_16, Stage.QUARTERS, Stage.SEMIS, Stage.FINAL, Stage.THIRD_PLACE].includes(selectedStage) && (
+        <div className="flex flex-col items-center mb-4 gap-3 w-full">
+          <div className="bg-slate-900/60 border border-slate-800/80 rounded-xl p-3 text-center text-[11px] text-amber-400 font-sans max-w-xl w-full flex items-center justify-center gap-2">
+            <span>⚠️</span>
+            {[Stage.SEMIS, Stage.FINAL, Stage.THIRD_PLACE].includes(selectedStage) ? (
+              <span><strong>Remise à zéro des cartons :</strong> Les cartons accumulés lors des tours précédents ont été remis à zéro à l'issue des quarts de finale. Les équipes demi-finalistes restantes repartent à zéro carton pour la phase finale.</span>
+            ) : (
+              <span><strong>Remise à zéro des cartons :</strong> Les cartons accumulés en phase de groupes ont été remis à zéro. Toute équipe sélectionnée en 16èmes repart à zéro carton.</span>
+            )}
+          </div>
           <button
             onClick={() => onImportTeams(selectedStage)}
             className="bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs px-4 py-2 rounded-lg shadow transition-all cursor-pointer"

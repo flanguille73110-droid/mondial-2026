@@ -619,7 +619,14 @@ export default function HomeTab({
 
                           {/* Cards inputs (Yellow / Red) */}
                           <div className="bg-slate-950/60 p-2.5 rounded-xl border border-slate-800/80 w-full max-w-[180px] space-y-2">
-                            <div className="text-[10px] font-bold text-slate-500 text-center uppercase tracking-wide">Cartons Équipe A</div>
+                            <div className="text-[10px] font-bold text-slate-500 text-center uppercase tracking-wide flex flex-col gap-0.5">
+                              <span>Cartons Équipe A</span>
+                              {match.stage !== Stage.GROUPS && (
+                                <span className="text-[9px] text-amber-500 font-medium font-sans normal-case">
+                                  {[Stage.SEMIS, Stage.FINAL, Stage.THIRD_PLACE].includes(match.stage) ? "(remis à zéro pour les demis/finale)" : "(remis à zéro pour les 16èmes)"}
+                                </span>
+                              )}
+                            </div>
                             <div className="flex items-center justify-around gap-2">
                               <div className="flex items-center gap-1.5">
                                 <div className="w-3 h-4 bg-amber-400 rounded-sm shadow" title="Cartons jaunes"></div>
@@ -777,7 +784,14 @@ export default function HomeTab({
 
                           {/* Cards inputs (Yellow / Red) */}
                           <div className="bg-slate-950/60 p-2.5 rounded-xl border border-slate-800/80 w-full max-w-[180px] space-y-2">
-                            <div className="text-[10px] font-bold text-slate-500 text-center uppercase tracking-wide">Cartons Équipe B</div>
+                            <div className="text-[10px] font-bold text-slate-500 text-center uppercase tracking-wide flex flex-col gap-0.5">
+                              <span>Cartons Équipe B</span>
+                              {match.stage !== Stage.GROUPS && (
+                                <span className="text-[9px] text-amber-500 font-medium font-sans normal-case">
+                                  {[Stage.SEMIS, Stage.FINAL, Stage.THIRD_PLACE].includes(match.stage) ? "(remis à zéro pour les demis/finale)" : "(remis à zéro pour les 16èmes)"}
+                                </span>
+                              )}
+                            </div>
                             <div className="flex items-center justify-around gap-2">
                               <div className="flex items-center gap-1.5">
                                 <div className="w-3 h-4 bg-amber-400 rounded-sm shadow" title="Cartons jaunes"></div>
@@ -935,12 +949,16 @@ export default function HomeTab({
                     <div className="mt-4 pt-3 border-t border-slate-800/60 flex justify-end">
                       <button
                         onClick={() => {
+                          // Valider automatiquement la rencontre si elle ne l'est pas encore
+                          if (!match.validated) {
+                            onValidateMatch(match.id);
+                          }
                           const updated = [...skippedMatchIds, match.id];
                           setSkippedMatchIds(updated);
                           localStorage.setItem("skipped_matches", JSON.stringify(updated));
                         }}
                         className="bg-emerald-600 hover:bg-emerald-500 text-slate-950 hover:text-slate-900 font-extrabold text-xs px-4 py-2 rounded-xl shadow-md hover:shadow-emerald-900/20 transition-all flex items-center gap-1.5 cursor-pointer border border-emerald-500/30"
-                        title="Passer cette rencontre et afficher la suite"
+                        title="Passer cette rencontre et valider le score pour afficher la suite"
                       >
                         Prochaine rencontre ➔
                       </button>
