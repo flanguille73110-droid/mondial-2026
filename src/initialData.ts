@@ -251,14 +251,14 @@ export function generateInitialMatches(): Match[] {
 
   // 2. ROUND of 16 (8e de finale) - 8 matches (M89 to M96)
   const r16Placeholders = [
-    { num: 89, labelA: "Vainqueur Match 74", labelB: "Vainqueur Match 77", date: "4 Juillet 2026", time: "23:00", ch: "TF1" },
-    { num: 90, labelA: "Vainqueur Match 73", labelB: "Vainqueur Match 75", date: "4 Juillet 2026", time: "19:00", ch: "M6" },
-    { num: 91, labelA: "Vainqueur Match 76", labelB: "Vainqueur Match 78", date: "5 Juillet 2026", time: "22:00", ch: "TF1" },
-    { num: 92, labelA: "Vainqueur Match 79", labelB: "Vainqueur Match 80", date: "6 Juillet 2026", time: "02:00", ch: "beIN Sports" },
-    { num: 93, labelA: "Vainqueur Match 83", labelB: "Vainqueur Match 84", date: "6 Juillet 2026", time: "21:00", ch: "M6" },
-    { num: 94, labelA: "Vainqueur Match 81", labelB: "Vainqueur Match 82", date: "7 Juillet 2026", time: "02:00", ch: "beIN Sports" },
-    { num: 95, labelA: "Vainqueur Match 86", labelB: "Vainqueur Match 88", date: "7 Juillet 2026", time: "18:00", ch: "TF1" },
-    { num: 96, labelA: "Vainqueur Match 85", labelB: "Vainqueur Match 87", date: "7 Juillet 2026", time: "22:00", ch: "M6" },
+    { num: 89, labelA: "Vainqueur #74", labelB: "Vainqueur #77", date: "4 Juillet 2026", time: "23:00", ch: "TF1" },
+    { num: 90, labelA: "Vainqueur #73", labelB: "Vainqueur #75", date: "4 Juillet 2026", time: "19:00", ch: "M6" },
+    { num: 91, labelA: "Vainqueur #76", labelB: "Vainqueur #78", date: "5 Juillet 2026", time: "22:00", ch: "TF1" },
+    { num: 92, labelA: "Vainqueur #79", labelB: "Vainqueur #80", date: "6 Juillet 2026", time: "02:00", ch: "beIN Sports" },
+    { num: 93, labelA: "Vainqueur #83", labelB: "Vainqueur #84", date: "6 Juillet 2026", time: "21:00", ch: "M6" },
+    { num: 94, labelA: "Vainqueur #81", labelB: "Vainqueur #82", date: "7 Juillet 2026", time: "02:00", ch: "beIN Sports" },
+    { num: 95, labelA: "Vainqueur #86", labelB: "Vainqueur #88", date: "7 Juillet 2026", time: "18:00", ch: "TF1" },
+    { num: 96, labelA: "Vainqueur #85", labelB: "Vainqueur #87", date: "7 Juillet 2026", time: "22:00", ch: "M6" },
   ];
 
   r16Placeholders.forEach((p, idx) => {
@@ -280,10 +280,10 @@ export function generateInitialMatches(): Match[] {
 
   // 3. QUARTERS - 4 matches (M97 to M100)
   const qfPlaceholders = [
-    { num: 97, labelA: "Vainqueur Match 89", labelB: "Vainqueur Match 90", date: "9 Juillet 2026", time: "22:00", ch: "TF1" },
-    { num: 98, labelA: "Vainqueur Match 93", labelB: "Vainqueur Match 94", date: "10 Juillet 2026", time: "21:00", ch: "M6" },
-    { num: 99, labelA: "Vainqueur Match 91", labelB: "Vainqueur Match 92", date: "11 Juillet 2026", time: "23:00", ch: "TF1" },
-    { num: 100, labelA: "Vainqueur Match 95", labelB: "Vainqueur Match 96", date: "12 Juillet 2026", time: "03:00", ch: "M6" },
+    { num: 97, labelA: "Vainqueur #89", labelB: "Vainqueur #90", date: "9 Juillet 2026", time: "22:00", ch: "TF1" },
+    { num: 98, labelA: "Vainqueur #93", labelB: "Vainqueur #94", date: "10 Juillet 2026", time: "21:00", ch: "M6" },
+    { num: 99, labelA: "Vainqueur #91", labelB: "Vainqueur #92", date: "11 Juillet 2026", time: "23:00", ch: "TF1" },
+    { num: 100, labelA: "Vainqueur #95", labelB: "Vainqueur #96", date: "12 Juillet 2026", time: "03:00", ch: "M6" },
   ];
 
   qfPlaceholders.forEach((p, idx) => {
@@ -305,8 +305,8 @@ export function generateInitialMatches(): Match[] {
 
   // 4. SEMIS - 2 matches (M101 to M102)
   const sfPlaceholders = [
-    { num: 101, labelA: "Vainqueur Match 97", labelB: "Vainqueur Match 98", date: "14 Juillet 2026", time: "21:00", ch: "TF1" },
-    { num: 102, labelA: "Vainqueur Match 99", labelB: "Vainqueur Match 100", date: "15 Juillet 2026", time: "21:00", ch: "M6" },
+    { num: 101, labelA: "Vainqueur #97", labelB: "Vainqueur #98", date: "14 Juillet 2026", time: "21:00", ch: "TF1" },
+    { num: 102, labelA: "Vainqueur #99", labelB: "Vainqueur #100", date: "15 Juillet 2026", time: "21:00", ch: "M6" },
   ];
 
   sfPlaceholders.forEach((p, idx) => {
@@ -333,8 +333,8 @@ export function generateInitialMatches(): Match[] {
     matchNumber: 103,
     teamAId: null,
     teamBId: null,
-    teamANamePlaceholder: "Perdant Match 101",
-    teamBNamePlaceholder: "Perdant Match 102",
+    teamANamePlaceholder: "Perdant #101",
+    teamBNamePlaceholder: "Perdant #102",
     scoreA: null,
     scoreB: null,
     date: "18 Juillet 2026",
@@ -349,8 +349,8 @@ export function generateInitialMatches(): Match[] {
     matchNumber: 104,
     teamAId: null,
     teamBId: null,
-    teamANamePlaceholder: "Vainqueur Match 101",
-    teamBNamePlaceholder: "Vainqueur Match 102",
+    teamANamePlaceholder: "Vainqueur #101",
+    teamBNamePlaceholder: "Vainqueur #102",
     scoreA: null,
     scoreB: null,
     date: "19 Juillet 2026",

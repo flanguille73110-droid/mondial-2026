@@ -145,7 +145,7 @@ export default function HomeTab({
   const activeMatches: Match[] = displayMatches.map(d => d.match);
 
   const finishedWithoutScore = sortedMatchesWithDate.filter(
-      ({ match, dateObj }) => (dateObj.getTime() + cutoff5HoursMs) <= nowMs && (match.scoreA === null || match.scoreB === null || !match.validated)
+      ({ match, dateObj }) => (dateObj.getTime() + cutoff5HoursMs) <= nowMs && !match.validated
   ).map(d => d.match);
 
   let statusText = "";

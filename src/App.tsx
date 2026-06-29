@@ -68,7 +68,23 @@ export default function App() {
 
     if (savedMatchesStr) {
       try {
-        setMatches(JSON.parse(savedMatchesStr));
+        let loadedMatches: Match[] = JSON.parse(savedMatchesStr);
+        // Migration des anciens placeholders pour être plus courts
+        loadedMatches = loadedMatches.map((m) => {
+          let updated = { ...m };
+          if (updated.teamANamePlaceholder) {
+            updated.teamANamePlaceholder = updated.teamANamePlaceholder
+              .replace("Vainqueur Match ", "Vainqueur #")
+              .replace("Perdant Match ", "Perdant #");
+          }
+          if (updated.teamBNamePlaceholder) {
+            updated.teamBNamePlaceholder = updated.teamBNamePlaceholder
+              .replace("Vainqueur Match ", "Vainqueur #")
+              .replace("Perdant Match ", "Perdant #");
+          }
+          return updated;
+        });
+        setMatches(loadedMatches);
       } catch (e) {
         setMatches(generateInitialMatches());
       }
@@ -328,11 +344,91 @@ export default function App() {
     setTimeout(() => setImportSuccess(false), 3000);
   };
 
+  // Helper function to get match winner and loser
+  const getMatchWinnerAndLoser = (m: Match): { winnerId: string | null; loserId: string | null } => {
+    if (m.scoreA === null || m.scoreB === null || !m.teamAId || !m.teamBId) {
+      return { winnerId: null, loserId: null };
+    }
+    if (m.scoreA > m.scoreB) {
+      return { winnerId: m.teamAId, loserId: m.teamBId };
+    }
+    if (m.scoreB > m.scoreA) {
+      return { winnerId: m.teamBId, loserId: m.teamAId };
+    }
+    if (m.hasPenalties && m.penaltyScoreA !== null && m.penaltyScoreB !== null) {
+      if (m.penaltyScoreA > m.penaltyScoreB) {
+        return { winnerId: m.teamAId, loserId: m.teamBId };
+      }
+      if (m.penaltyScoreB > m.penaltyScoreA) {
+        return { winnerId: m.teamBId, loserId: m.teamAId };
+      }
+    }
+    return { winnerId: null, loserId: null };
+  };
+
   // Validate match
   const handleValidateMatch = (matchId: string) => {
-    const updatedMatches = matches.map((m) =>
+    const targetMatch = matches.find((m) => m.id === matchId);
+    if (!targetMatch) return;
+
+    let updatedMatches = matches.map((m) =>
       m.id === matchId ? { ...m, validated: true } : m
     );
+
+    let updatedTeams = [...teams];
+
+    // Si c'est un match de phase finale (matchNumber >= 73)
+    if (targetMatch.matchNumber && targetMatch.matchNumber >= 73 && targetMatch.matchNumber <= 104) {
+      const { winnerId, loserId } = getMatchWinnerAndLoser(targetMatch);
+
+      // Éliminer l'équipe perdante (sauf pour les demi-finales M101 et M102 car elles jouent la 3e place)
+      if (loserId && targetMatch.matchNumber !== 101 && targetMatch.matchNumber !== 102) {
+        updatedTeams = teams.map((t) =>
+          t.id === loserId ? { ...t, eliminated: true } : t
+        );
+        setTeams(updatedTeams);
+        localStorage.setItem("wc2026_teams", JSON.stringify(updatedTeams));
+      }
+
+      // Propager le vainqueur et/ou le perdant dans les matchs suivants
+      if (winnerId || loserId) {
+        updatedMatches = updatedMatches.map((m) => {
+          let nextTeamAId = m.teamAId;
+          let nextTeamBId = m.teamBId;
+
+          // Analyse de teamANamePlaceholder
+          if (m.teamANamePlaceholder) {
+            const num = parseInt(m.teamANamePlaceholder.replace(/\D/g, ""), 10);
+            if (num === targetMatch.matchNumber) {
+              const isWinnerPlaceholder = m.teamANamePlaceholder.toLowerCase().includes("vainqueur");
+              const isLoserPlaceholder = m.teamANamePlaceholder.toLowerCase().includes("perdant");
+              if (isWinnerPlaceholder && winnerId) {
+                nextTeamAId = winnerId;
+              } else if (isLoserPlaceholder && loserId) {
+                nextTeamAId = loserId;
+              }
+            }
+          }
+
+          // Analyse de teamBNamePlaceholder
+          if (m.teamBNamePlaceholder) {
+            const num = parseInt(m.teamBNamePlaceholder.replace(/\D/g, ""), 10);
+            if (num === targetMatch.matchNumber) {
+              const isWinnerPlaceholder = m.teamBNamePlaceholder.toLowerCase().includes("vainqueur");
+              const isLoserPlaceholder = m.teamBNamePlaceholder.toLowerCase().includes("perdant");
+              if (isWinnerPlaceholder && winnerId) {
+                nextTeamBId = winnerId;
+              } else if (isLoserPlaceholder && loserId) {
+                nextTeamBId = loserId;
+              }
+            }
+          }
+
+          return { ...m, teamAId: nextTeamAId, teamBId: nextTeamBId };
+        });
+      }
+    }
+
     setMatches(updatedMatches);
     localStorage.setItem("wc2026_matches", JSON.stringify(updatedMatches));
   };
