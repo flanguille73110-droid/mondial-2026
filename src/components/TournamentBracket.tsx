@@ -14,6 +14,16 @@ const BracketMatchCard = ({ matchNum, matches, teams }: { matchNum: number; matc
   const teamA = match.teamAId ? teams.find(t => t.id === match.teamAId) : null;
   const teamB = match.teamBId ? teams.find(t => t.id === match.teamBId) : null;
 
+  const isTeamALoser = match.scoreA !== null && match.scoreB !== null && (
+    match.scoreA < match.scoreB ||
+    (match.scoreA === match.scoreB && !!match.hasPenalties && match.penaltyScoreA !== null && match.penaltyScoreB !== null && match.penaltyScoreA < match.penaltyScoreB)
+  );
+
+  const isTeamBLoser = match.scoreA !== null && match.scoreB !== null && (
+    match.scoreB < match.scoreA ||
+    (match.scoreA === match.scoreB && !!match.hasPenalties && match.penaltyScoreA !== null && match.penaltyScoreB !== null && match.penaltyScoreB < match.penaltyScoreA)
+  );
+
   return (
     <div className="flex flex-col w-48 shrink-0 select-none">
       {/* Date, Heure et Numéro de match */}
@@ -34,7 +44,7 @@ const BracketMatchCard = ({ matchNum, matches, teams }: { matchNum: number; matc
             {teamA ? (
               <>
                 <Flag emoji={teamA.flag} name={teamA.name} className="w-4 h-3 shrink-0 rounded-[1.5px] shadow-sm" />
-                <span className={`text-[11px] font-bold text-slate-200 truncate ${match.scoreA !== null && match.scoreB !== null && match.scoreA < match.scoreB ? 'opacity-40 line-through font-normal' : ''}`}>
+                <span className={`text-[11px] font-bold text-slate-200 truncate ${isTeamALoser ? 'opacity-40 line-through font-normal' : ''}`}>
                   {teamA.name}
                 </span>
               </>
@@ -46,7 +56,7 @@ const BracketMatchCard = ({ matchNum, matches, teams }: { matchNum: number; matc
           </div>
           {match.scoreA !== null && (
             <div className="flex items-center gap-0.5 shrink-0 font-mono text-xs font-bold">
-              <span className={match.scoreA < (match.scoreB ?? 0) ? 'text-slate-500' : 'text-slate-100'}>
+              <span className={isTeamALoser ? 'text-slate-500' : 'text-slate-100'}>
                 {match.scoreA}
               </span>
               {match.hasPenalties && match.penaltyScoreA !== null && (
@@ -62,7 +72,7 @@ const BracketMatchCard = ({ matchNum, matches, teams }: { matchNum: number; matc
             {teamB ? (
               <>
                 <Flag emoji={teamB.flag} name={teamB.name} className="w-4 h-3 shrink-0 rounded-[1.5px] shadow-sm" />
-                <span className={`text-[11px] font-bold text-slate-200 truncate ${match.scoreA !== null && match.scoreB !== null && match.scoreB < match.scoreA ? 'opacity-40 line-through font-normal' : ''}`}>
+                <span className={`text-[11px] font-bold text-slate-200 truncate ${isTeamBLoser ? 'opacity-40 line-through font-normal' : ''}`}>
                   {teamB.name}
                 </span>
               </>
@@ -74,7 +84,7 @@ const BracketMatchCard = ({ matchNum, matches, teams }: { matchNum: number; matc
           </div>
           {match.scoreB !== null && (
             <div className="flex items-center gap-0.5 shrink-0 font-mono text-xs font-bold">
-              <span className={match.scoreB < (match.scoreA ?? 0) ? 'text-slate-500' : 'text-slate-100'}>
+              <span className={isTeamBLoser ? 'text-slate-500' : 'text-slate-100'}>
                 {match.scoreB}
               </span>
               {match.hasPenalties && match.penaltyScoreB !== null && (

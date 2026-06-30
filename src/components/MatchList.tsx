@@ -246,7 +246,7 @@ export default function MatchList({
                         if (grpTeams.length === 0) return null;
                         
                         const isGroupStage = selectedStage === Stage.GROUPS;
-                        const available = grpTeams.filter(t => (isGroupStage || !t.eliminated) && (!placedTeamIds.has(t.id) || t.id === match.teamAId));
+                        const available = grpTeams.filter(t => (isGroupStage || !t.eliminated || t.id === match.teamAId) && (!placedTeamIds.has(t.id) || t.id === match.teamAId));
                         const placed = grpTeams.filter(t => !isGroupStage && placedTeamIds.has(t.id) && t.id !== match.teamAId);
                         
                         return (
@@ -402,7 +402,7 @@ export default function MatchList({
                         if (grpTeams.length === 0) return null;
                         
                         const isGroupStage = selectedStage === Stage.GROUPS;
-                        const available = grpTeams.filter(t => (isGroupStage || !t.eliminated) && (!placedTeamIds.has(t.id) || t.id === match.teamBId));
+                        const available = grpTeams.filter(t => (isGroupStage || !t.eliminated || t.id === match.teamBId) && (!placedTeamIds.has(t.id) || t.id === match.teamBId));
                         const placed = grpTeams.filter(t => !isGroupStage && placedTeamIds.has(t.id) && t.id !== match.teamBId);
                         
                         return (
@@ -519,6 +519,29 @@ export default function MatchList({
                           min="0"
                           placeholder="0"
                           value={match.penaltyScoreA ?? ""}
+                          onFocus={(e) => {
+                            e.target.select();
+                            if (match.penaltyScoreA === 0 && onUpdateKnockoutDetails) {
+                              onUpdateKnockoutDetails(
+                                match.id,
+                                !!match.hasExtraTime,
+                                !!match.hasPenalties,
+                                null,
+                                match.penaltyScoreB ?? null
+                              );
+                            }
+                          }}
+                          onBlur={() => {
+                            if (match.penaltyScoreA === null && onUpdateKnockoutDetails) {
+                              onUpdateKnockoutDetails(
+                                match.id,
+                                !!match.hasExtraTime,
+                                !!match.hasPenalties,
+                                0,
+                                match.penaltyScoreB ?? null
+                              );
+                            }
+                          }}
                           onChange={(e) => {
                             const val = e.target.value === "" ? null : Math.max(0, parseInt(e.target.value) || 0);
                             if (onUpdateKnockoutDetails) {
@@ -543,6 +566,29 @@ export default function MatchList({
                           min="0"
                           placeholder="0"
                           value={match.penaltyScoreB ?? ""}
+                          onFocus={(e) => {
+                            e.target.select();
+                            if (match.penaltyScoreB === 0 && onUpdateKnockoutDetails) {
+                              onUpdateKnockoutDetails(
+                                match.id,
+                                !!match.hasExtraTime,
+                                !!match.hasPenalties,
+                                match.penaltyScoreA ?? null,
+                                null
+                              );
+                            }
+                          }}
+                          onBlur={() => {
+                            if (match.penaltyScoreB === null && onUpdateKnockoutDetails) {
+                              onUpdateKnockoutDetails(
+                                match.id,
+                                !!match.hasExtraTime,
+                                !!match.hasPenalties,
+                                match.penaltyScoreA ?? null,
+                                0
+                              );
+                            }
+                          }}
                           onChange={(e) => {
                             const val = e.target.value === "" ? null : Math.max(0, parseInt(e.target.value) || 0);
                             if (onUpdateKnockoutDetails) {

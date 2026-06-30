@@ -379,6 +379,29 @@ export default function HomeTab({
                               min="0"
                               placeholder="0"
                               value={match.penaltyScoreA ?? ""}
+                              onFocus={(e) => {
+                                e.target.select();
+                                if (match.penaltyScoreA === 0 && onUpdateKnockoutDetails) {
+                                  onUpdateKnockoutDetails(
+                                    match.id,
+                                    !!match.hasExtraTime,
+                                    !!match.hasPenalties,
+                                    null,
+                                    match.penaltyScoreB ?? null
+                                  );
+                                }
+                              }}
+                              onBlur={() => {
+                                if (match.penaltyScoreA === null && onUpdateKnockoutDetails) {
+                                  onUpdateKnockoutDetails(
+                                    match.id,
+                                    !!match.hasExtraTime,
+                                    !!match.hasPenalties,
+                                    0,
+                                    match.penaltyScoreB ?? null
+                                  );
+                                }
+                              }}
                               onChange={(e) => {
                                 const val = e.target.value === "" ? null : Math.max(0, parseInt(e.target.value) || 0);
                                 if (onUpdateKnockoutDetails) {
@@ -403,6 +426,29 @@ export default function HomeTab({
                               min="0"
                               placeholder="0"
                               value={match.penaltyScoreB ?? ""}
+                              onFocus={(e) => {
+                                e.target.select();
+                                if (match.penaltyScoreB === 0 && onUpdateKnockoutDetails) {
+                                  onUpdateKnockoutDetails(
+                                    match.id,
+                                    !!match.hasExtraTime,
+                                    !!match.hasPenalties,
+                                    match.penaltyScoreA ?? null,
+                                    null
+                                  );
+                                }
+                              }}
+                              onBlur={() => {
+                                if (match.penaltyScoreB === null && onUpdateKnockoutDetails) {
+                                  onUpdateKnockoutDetails(
+                                    match.id,
+                                    !!match.hasExtraTime,
+                                    !!match.hasPenalties,
+                                    match.penaltyScoreA ?? null,
+                                    0
+                                  );
+                                }
+                              }}
                               onChange={(e) => {
                                 const val = e.target.value === "" ? null : Math.max(0, parseInt(e.target.value) || 0);
                                 if (onUpdateKnockoutDetails) {
@@ -886,6 +932,29 @@ export default function HomeTab({
                                   min="0"
                                   placeholder="0"
                                   value={match.penaltyScoreA ?? ""}
+                                  onFocus={(e) => {
+                                    e.target.select();
+                                    if (match.penaltyScoreA === 0 && onUpdateKnockoutDetails) {
+                                      onUpdateKnockoutDetails(
+                                        match.id,
+                                        !!match.hasExtraTime,
+                                        !!match.hasPenalties,
+                                        null,
+                                        match.penaltyScoreB ?? null
+                                      );
+                                    }
+                                  }}
+                                  onBlur={() => {
+                                    if (match.penaltyScoreA === null && onUpdateKnockoutDetails) {
+                                      onUpdateKnockoutDetails(
+                                        match.id,
+                                        !!match.hasExtraTime,
+                                        !!match.hasPenalties,
+                                        0,
+                                        match.penaltyScoreB ?? null
+                                      );
+                                    }
+                                  }}
                                   onChange={(e) => {
                                     const val = e.target.value === "" ? null : Math.max(0, parseInt(e.target.value) || 0);
                                     if (onUpdateKnockoutDetails) {
@@ -910,6 +979,29 @@ export default function HomeTab({
                                   min="0"
                                   placeholder="0"
                                   value={match.penaltyScoreB ?? ""}
+                                  onFocus={(e) => {
+                                    e.target.select();
+                                    if (match.penaltyScoreB === 0 && onUpdateKnockoutDetails) {
+                                      onUpdateKnockoutDetails(
+                                        match.id,
+                                        !!match.hasExtraTime,
+                                        !!match.hasPenalties,
+                                        match.penaltyScoreA ?? null,
+                                        null
+                                      );
+                                    }
+                                  }}
+                                  onBlur={() => {
+                                    if (match.penaltyScoreB === null && onUpdateKnockoutDetails) {
+                                      onUpdateKnockoutDetails(
+                                        match.id,
+                                        !!match.hasExtraTime,
+                                        !!match.hasPenalties,
+                                        match.penaltyScoreA ?? null,
+                                        0
+                                      );
+                                    }
+                                  }}
                                   onChange={(e) => {
                                     const val = e.target.value === "" ? null : Math.max(0, parseInt(e.target.value) || 0);
                                     if (onUpdateKnockoutDetails) {
