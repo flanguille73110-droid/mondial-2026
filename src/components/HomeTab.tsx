@@ -107,18 +107,19 @@ export default function HomeTab({
   // Une rencontre reste affichée en haut (dans l'accueil) si :
   // - Elle a déjà commencé (dateObj.getTime() <= nowMs)
   // - ET son coup d'envoi a eu lieu il y a moins de 5 heures (nowMs - dateObj.getTime() < 5h)
+  // - ET elle n'a pas été validée (non validée)
   // - ET elle n'a pas été ignorée par l'utilisateur (non présente dans skippedMatchIds)
   const cutoff5HoursMs = 5 * 60 * 60 * 1000;
   
   const activeOngoing = sortedMatchesWithDate.filter(({ match, dateObj }) => {
     const timeSinceStart = nowMs - dateObj.getTime();
-    return timeSinceStart >= 0 && timeSinceStart < cutoff5HoursMs && !skippedMatchIds.includes(match.id);
+    return timeSinceStart >= 0 && timeSinceStart < cutoff5HoursMs && !match.validated && !skippedMatchIds.includes(match.id);
   });
 
   // On peut également afficher les rencontres qui vont commencer dans moins de 15 minutes
   const activeImminent = sortedMatchesWithDate.filter(({ match, dateObj }) => {
     const timeToStart = dateObj.getTime() - nowMs;
-    return timeToStart > 0 && timeToStart <= 15 * 60 * 1000 && !skippedMatchIds.includes(match.id);
+    return timeToStart > 0 && timeToStart <= 15 * 60 * 1000 && !match.validated && !skippedMatchIds.includes(match.id);
   });
 
   // Combiner les rencontres en cours et imminentes
@@ -126,8 +127,8 @@ export default function HomeTab({
 
   // Si aucune rencontre n'est actuellement en cours ou imminente :
   if (displayMatches.length === 0) {
-    // Trouver les prochaines rencontres à venir dans le futur (non ignorées)
-    const upcoming = sortedMatchesWithDate.filter(({ match, dateObj }) => dateObj.getTime() > nowMs && !skippedMatchIds.includes(match.id));
+    // Trouver les prochaines rencontres à venir dans le futur (non validées et non ignorées)
+    const upcoming = sortedMatchesWithDate.filter(({ match, dateObj }) => dateObj.getTime() > nowMs && !match.validated && !skippedMatchIds.includes(match.id));
     if (upcoming.length > 0) {
       // On affiche toutes les rencontres qui commencent au même moment le plus proche
       const earliestTime = upcoming[0].dateObj.getTime();
